@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/lemitz/FeatherW8-CLI/releases"><img src="https://img.shields.io/badge/version-0.2.0-8b8cff" alt="Версия 0.2.0"></a>
+  <a href="https://github.com/lemitz/FeatherW8-CLI/releases"><img src="https://img.shields.io/badge/version-1.0-8b8cff" alt="Версия 1.0"></a>
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011%20x64-0078d4" alt="Windows 10 / 11 x64">
   <img src="https://img.shields.io/badge/built%20with-.NET%2010-512bd4" alt=".NET 10">
   <img src="https://img.shields.io/badge/output-ASIO%20%7C%20WASAPI%20Exclusive-e8590c" alt="ASIO / WASAPI Exclusive">
@@ -32,7 +32,7 @@ FeatherW8 делает одну вещь: берёт файлы или папк�
 Весь интерфейс целиком:
 
 ```
-FeatherW8 0.2  |  MP3 · WAV · Ogg Vorbis · Opus
+FeatherW8 1.0  |  MP3 · WAV · Ogg Vorbis · Opus
 Трек 3/12: 03 - Blue in Green.opus
 [=========================>-------------------------------------] 02:14 / 05:37
 Статус: играет   Повтор: выкл.

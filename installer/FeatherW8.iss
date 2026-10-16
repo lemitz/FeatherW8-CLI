@@ -1,5 +1,5 @@
 #define AppName "FeatherW8"
-#define AppVersion "0.2.0"
+#define AppVersion "1.0.0"
 #define AppExeName "FeatherW8.exe"
 #define ContextVerb "FeatherW8.Play"
 
