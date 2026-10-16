@@ -21,6 +21,10 @@
   <a href="README.md">English</a> · <b>Русский</b>
 </p>
 
+<p align="center">
+  Ищете музыкальный плеер для Android? Смотрите <a href="https://github.com/lemitz/FeatherW8">lemitz/FeatherW8</a>.
+</p>
+
 ---
 
 FeatherW8 делает одну вещь: берёт файлы или папки, которые ты ему дал, и играет их по порядку настолько честно, насколько позволяет железо. Здесь нет библиотеки, плейлистов и редактора тегов — только очередь, прогресс-бар и несколько клавиш. Плеер делался под настольный ЦАП FiiO K11, поэтому при наличии драйвера FiiO ASIO он выбирает его, а для любого другого USB DAC использует WASAPI Exclusive. В обоих случаях декодированный звук доходит до устройства нетронутым: без программного ресемплинга, без программной громкости, без микшера. Если строгий вывод для трека невозможен, плеер прямо об этом говорит и спрашивает разрешения, прежде чем опуститься до общего микшера Windows, — молча он этого не делает никогда.
@@ -222,6 +226,10 @@ THIRD-PARTY-NOTICES.md         лицензии используемых пак�
 [.NET 10](https://dotnet.microsoft.com) · C# · [NAudio](https://github.com/naudio/NAudio) (`Wasapi`, `Asio`) · [NAudio.Vorbis](https://github.com/naudio/NAudio.Vorbis) / [NVorbis](https://github.com/NVorbis/NVorbis) · [Concentus.Oggfile](https://github.com/lostromb/concentus.oggfile) / [Concentus](https://github.com/lostromb/Concentus) · Windows Media Foundation · [Inno Setup 6](https://jrsoftware.org/isinfo.php)
 
 Ищешь версию для Android? Это [lemitz/FeatherW8](https://github.com/lemitz/FeatherW8).
+
+## Лицензия
+
+FeatherW8 распространяется по лицензии [MIT](LICENSE). Сторонние пакеты сохраняют свои лицензии, см. [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 ---
 

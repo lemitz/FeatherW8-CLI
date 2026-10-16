@@ -21,6 +21,10 @@
   <b>English</b> · <a href="README.ru.md">Русский</a>
 </p>
 
+<p align="center">
+  Looking for the Android music player? See <a href="https://github.com/lemitz/FeatherW8">lemitz/FeatherW8</a>.
+</p>
+
 ---
 
 FeatherW8 does one thing: it takes the files or folders you hand it and plays them, in order, as faithfully as the hardware allows. There is no library, no playlists, no tag editor — just a queue, a progress bar and a handful of keys. It was built around a FiiO K11 desktop DAC, so it prefers the FiiO ASIO driver when one is installed and falls back to WASAPI Exclusive for any other USB DAC. In both cases the decoded audio reaches the device untouched: no software resampling, no software volume, no mixer. If strict output is impossible for a track, the player says so and asks before degrading to the shared Windows mixer — it never does that silently.
@@ -222,6 +226,10 @@ The split is deliberate: `UI` only reads state from `PlayerController` and draws
 [.NET 10](https://dotnet.microsoft.com) · C# · [NAudio](https://github.com/naudio/NAudio) (`Wasapi`, `Asio`) · [NAudio.Vorbis](https://github.com/naudio/NAudio.Vorbis) / [NVorbis](https://github.com/NVorbis/NVorbis) · [Concentus.Oggfile](https://github.com/lostromb/concentus.oggfile) / [Concentus](https://github.com/lostromb/Concentus) · Windows Media Foundation · [Inno Setup 6](https://jrsoftware.org/isinfo.php)
 
 Looking for the Android version? That's [lemitz/FeatherW8](https://github.com/lemitz/FeatherW8).
+
+## License
+
+FeatherW8 is released under the [MIT License](LICENSE). Third-party packages keep their own licenses; see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 ---
 
