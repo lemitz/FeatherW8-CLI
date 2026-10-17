@@ -4,7 +4,12 @@ using FeatherW8.UI;
 
 internal static class Program
 {
-    private static async Task<int> Main(string[] args)
+    // ASIO drivers are COM objects that can only be created (and must be driven and disposed)
+    // on an STA thread. Everything that touches the output device therefore runs on this one
+    // thread: the main loop is deliberately synchronous - an `await` would resume on the
+    // MTA thread pool and ASIO would silently fail with "Unable to instantiate ASIO".
+    [STAThread]
+    private static int Main(string[] args)
     {
         AppSettings.Initialize();
         Texts.Initialize(AppSettings.Language);
@@ -61,7 +66,7 @@ internal static class Program
 
                 player.Update();
                 TerminalUi.Draw(player);
-                await Task.Delay(80).ConfigureAwait(false);
+                Thread.Sleep(80);
             }
 
             return 0;

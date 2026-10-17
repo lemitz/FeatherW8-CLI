@@ -63,6 +63,7 @@ internal sealed class PlaybackSession : IDisposable
     public Exception? Failure => _failure;
     public bool IsStrictOutput => _selection.IsStrict;
     public string OutputLabel => _selection.Label;
+    public string? OutputNote => _selection.Note;
     public bool IsPaused => _output.PlaybackState == PlaybackState.Paused;
     public bool IsPlaying => _output.PlaybackState == PlaybackState.Playing;
     public long Position => _source.Position;

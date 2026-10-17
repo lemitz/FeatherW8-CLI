@@ -28,6 +28,9 @@ internal sealed class AudioOutputSelection : IDisposable
     public string Label { get; }
     public bool IsStrict { get; }
 
+    /// <summary>Explains why a preferred path (ASIO) was skipped; shown to the user.</summary>
+    public string? Note { get; set; }
+
     public void Dispose()
     {
         if (Interlocked.Exchange(ref _disposed, 1) != 0)
@@ -90,7 +93,10 @@ internal static class AudioOutputFactory
         {
             try
             {
-                return CreateWasapiExclusive(source, preferExternalUsbDevice: preference == AudioOutputPreference.Auto);
+                var selection = CreateWasapiExclusive(source, preferExternalUsbDevice: preference == AudioOutputPreference.Auto);
+                if (failures.Count > 0)
+                    selection.Note = Texts.Format("AudioModeAsioSkipped", failures[^1].Message);
+                return selection;
             }
             catch (Exception ex)
             {

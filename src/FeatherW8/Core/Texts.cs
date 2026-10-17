@@ -48,6 +48,10 @@ internal static class Texts
             ["OggHeaderTooLarge"] = ("The Ogg header is too large.", "Ogg-заголовок слишком большой."),
             ["TruncatedOgg"] = ("The file is truncated inside the Ogg header.", "Файл обрезан внутри заголовка Ogg."),
             ["BufferRangeInvalid"] = ("The buffer range is outside the destination array.", "Диапазон буфера выходит за границы массива назначения."),
+            ["FlacInvalid"] = ("The file is not a valid FLAC stream.", "Файл не является корректным FLAC-потоком."),
+            ["FlacChannels"] = ("This version supports mono/stereo FLAC only; the file has {0} channels.", "Эта версия воспроизводит FLAC только mono/stereo; в файле {0} каналов."),
+            ["FlacBitDepth"] = ("FLAC with {0} bits per sample is not supported (up to 24 bit).", "FLAC с {0} бит на сэмпл не поддерживается (до 24 бит)."),
+            ["FlacUnknownLength"] = ("The FLAC file does not declare its length (STREAMINFO is empty).", "FLAC-файл не содержит длительности (пустой STREAMINFO)."),
             ["AudioModeAsio"] = ("FiiO ASIO", "FiiO ASIO"),
             ["AudioModeWasapiExclusive"] = ("WASAPI Exclusive", "WASAPI Exclusive"),
             ["AudioModeShared"] = ("WASAPI Shared", "WASAPI Shared"),
@@ -64,6 +68,7 @@ internal static class Texts
             ["AudioModeFormatUnsupported"] = ("The device does not support this track's sample rate/format.", "Устройство не поддерживает частоту дискретизации/формат этого трека."),
             ["AudioModeChannelsUnsupported"] = ("The ASIO driver does not expose enough output channels.", "ASIO-драйвер предоставляет недостаточно выходных каналов."),
             ["AudioModeDeviceUnavailable"] = ("The selected audio device or driver is unavailable.", "Выбранное аудиоустройство или драйвер недоступны."),
+            ["AudioModeAsioSkipped"] = ("ASIO could not start ({0}); using WASAPI Exclusive.", "ASIO не запустился ({0}); используется WASAPI Exclusive."),
             ["AudioModeNoAsioDriver"] = ("No ASIO driver is installed.", "ASIO-драйвер не установлен."),
         };
 

@@ -213,7 +213,7 @@ internal sealed class PlayerController : IDisposable
             if (!_session.IsStrictOutput)
                 Message = messageAfterStart ?? Texts.Get("AudioModeSharedActive");
             else
-                Message = messageAfterStart;
+                Message = messageAfterStart ?? _session.OutputNote;
         }
         catch (AudioOutputUnavailableException ex)
         {
