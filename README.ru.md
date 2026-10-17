@@ -36,7 +36,7 @@ FeatherW8 1.1  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD
 Трек 3/12: 03 - Blue in Green.flac
 [=========================>-------------------------------------] 02:14 / 05:37
 Статус: играет   Повтор: выкл.
-Вывод: WASAPI Exclusive — Динамики (FiiO K11)
+Вывод: ASIO — FiiO ASIO Driver
 ↑/↓ трек   ←/→ ±5 с (Shift ±30 с)   Space пауза   C повтор   Q/Esc выход
 ```
 
@@ -91,6 +91,8 @@ FeatherW8 1.1  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD
 | Пропустить трек | `N` |
 | Выход | `Q` или `Esc` |
 
+Для файлов DSD вариант `Enter` не предлагается никогда — DSD нельзя играть через общий микшер, — только пропуск и выход.
+
 `↑` на первом треке запускает его заново (или переходит к последнему, если повтор — *очередь*); `↓` на последнем треке останавливает воспроизведение с сообщением, если повтор не *очередь*. Если согласиться на Shared клавишей `Enter`, он останется включённым до конца очереди — чтобы вернуться в строгий режим, перезапусти плеер.
 
 ## Установка
@@ -101,7 +103,7 @@ FeatherW8 1.1  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD
 - **Portable** — `FeatherW8-Portable-win-x64.zip`: самодостаточный единый `FeatherW8.exe`, которому не нужен .NET на машине, плюс файл настроек и скрипты для Проводника. Распакуй куда угодно, переноси когда угодно.
 - **Portable, маленький** — `FeatherW8-Portable-small-requires-dotnet10-win-x64.zip`: та же папка без встроенного рантайма; нужен установленный [.NET 10 runtime](https://dotnet.microsoft.com/download/dotnet/10.0).
 
-Бери их на странице [Releases](https://github.com/lemitz/FeatherW8-CLI/releases) или собери сам. FeatherW8 нужна Windows 10/11 x64 и больше ничего. Для ASIO на FiiO K11 отдельно поставь драйвер FiiO USB DAC — в комплект он не входит, а без него плеер просто использует WASAPI Exclusive.
+Бери их на странице [Releases](https://github.com/lemitz/FeatherW8-CLI/releases) или собери сам. FeatherW8 нужна Windows 10/11 x64 и больше ничего. Для ASIO на FiiO K11 отдельно поставь драйвер FiiO USB DAC — в комплект он не входит. Без него плеер откатывается на WASAPI Exclusive, но на K11 этот путь только 16-бит, так что 24-бит FLAC и DSD требуют ASIO-драйвера.
 
 ### Запуск
 
@@ -117,7 +119,7 @@ FeatherW8 нужно интерактивное окно консоли (под�
 
 ### Контекстное меню Проводника (portable-версия)
 
-- `Register-Integration.bat` добавляет «Проиграть в FeatherW8» для файлов MP3/WAV/Ogg/Opus и «Открыть папку в FeatherW8» для папок — для текущего пользователя. В Windows 11 пункты находятся в «Показать дополнительные параметры».
+- `Register-Integration.bat` добавляет «Проиграть в FeatherW8» для файлов MP3/WAV/FLAC/Ogg/Opus/DSD и «Открыть папку в FeatherW8» для папок — для текущего пользователя. В Windows 11 пункты находятся в «Показать дополнительные параметры».
 - `Unregister-Integration.bat` их убирает.
 - Windows хранит абсолютный путь к EXE, поэтому после переноса папки запусти `Register-Integration.bat` ещё раз.
 - Установщик делает то же самое своей необязательной галочкой и убирает пункты при удалении.
@@ -203,6 +205,16 @@ iscc installer\FeatherW8.iss     # установщик → dist\FeatherW8-Setup
 ```
 
 `publish.ps1` делает два прохода `dotnet publish` для `win-x64` — self-contained single-file и framework-dependent, — кладёт рядом с EXE `FeatherW8.properties`, скрипты для Проводника и `THIRD-PARTY-NOTICES.md` и упаковывает обе папки в `dist\`. Установщик забирает self-contained-сборку из `publish\win-x64`, так что сначала запусти скрипт.
+
+### Релизы
+
+Каждый pull request, каждый push в `main` и каждый ручной запуск workflow *Build and release* собирают установщик и оба portable-архива и прикладывают их к запуску как артефакты (Actions → запуск → Artifacts) — удобно проверить изменение до мерджа. Push версионного тега публикует релиз из той же сборки:
+
+```bash
+git tag v1.2 && git push origin v1.2    # -> GitHub Release "FeatherW8-CLI v1.2" с тремя файлами
+```
+
+Тег задаёт версию сборки (`v1.2` → `1.2.0`); держи в соответствии с ним `<Version>` в `FeatherW8.csproj`, значение по умолчанию в `installer/FeatherW8.iss`, текст в шапке и бейджи в README.
 
 Перед распространением сборки с поддержкой ASIO проверь условия распространения ASIO SDK — см. [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md). Драйвер FiiO в комплект не включается никогда.
 

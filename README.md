@@ -36,7 +36,7 @@ FeatherW8 1.1  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD
 Track 3/12: 03 - Blue in Green.flac
 [=========================>-------------------------------------] 02:14 / 05:37
 Status: playing   Repeat: off
-Output: WASAPI Exclusive — Speakers (FiiO K11)
+Output: ASIO — FiiO ASIO Driver
 ↑/↓ track   ←/→ ±5 s (Shift ±30 s)   Space pause   C repeat   Q/Esc quit
 ```
 
@@ -91,6 +91,8 @@ When strict output is unavailable and the player asks what to do:
 | Skip this track | `N` |
 | Quit | `Q` or `Esc` |
 
+For DSD files the `Enter` option is never offered - DSD cannot be played through the shared mixer - only skip and quit.
+
 `↑` on the first track restarts it (or wraps to the last one when repeat is set to *queue*); `↓` on the last track stops with a message unless repeat is *queue*. Once you accept Shared with `Enter`, it stays on for the rest of the queue — restart the player to get back to strict mode.
 
 ## Installation
@@ -101,7 +103,7 @@ Every build produces three flavours (see [Building the archives and the installe
 - **Portable** — `FeatherW8-Portable-win-x64.zip`: a self-contained single `FeatherW8.exe` that needs no .NET on the machine, plus the settings file and the Explorer scripts. Unzip anywhere, move it whenever you like.
 - **Portable, small** — `FeatherW8-Portable-small-requires-dotnet10-win-x64.zip`: the same folder without the bundled runtime; requires the [.NET 10 runtime](https://dotnet.microsoft.com/download/dotnet/10.0).
 
-Grab them from the [Releases](https://github.com/lemitz/FeatherW8-CLI/releases) page or build them yourself. FeatherW8 needs Windows 10/11 x64 and nothing else. For ASIO on a FiiO K11 install the FiiO USB DAC driver separately — it is not bundled, and without it the player simply uses WASAPI Exclusive.
+Grab them from the [Releases](https://github.com/lemitz/FeatherW8-CLI/releases) page or build them yourself. FeatherW8 needs Windows 10/11 x64 and nothing else. For ASIO on a FiiO K11 install the FiiO USB DAC driver separately — it is not bundled. Without it the player falls back to WASAPI Exclusive, but on the K11 that path is 16-bit only, so 24-bit FLAC and DSD need the ASIO driver.
 
 ### Running it
 
@@ -117,7 +119,7 @@ FeatherW8 needs an interactive console window (Windows Terminal and the classic 
 
 ### Explorer context menu (portable build)
 
-- `Register-Integration.bat` adds *Play in FeatherW8* to MP3/WAV/Ogg/Opus files and *Open folder in FeatherW8* to folders for the current user. On Windows 11 the entries live under *Show more options*.
+- `Register-Integration.bat` adds *Play in FeatherW8* to MP3/WAV/FLAC/Ogg/Opus/DSD files and *Open folder in FeatherW8* to folders for the current user. On Windows 11 the entries live under *Show more options*.
 - `Unregister-Integration.bat` removes them.
 - Windows stores the absolute path to the EXE, so run `Register-Integration.bat` again after moving the folder.
 - The installer does the same through its optional task and removes the entries on uninstall.
@@ -203,6 +205,16 @@ iscc installer\FeatherW8.iss     # installer → dist\FeatherW8-Setup-win-x64.ex
 ```
 
 `publish.ps1` runs two `dotnet publish` passes for `win-x64` — self-contained single-file and framework-dependent — copies `FeatherW8.properties`, the Explorer scripts and `THIRD-PARTY-NOTICES.md` next to the EXE and zips both folders into `dist\`. The installer packs the self-contained output from `publish\win-x64`, so run the script first.
+
+### Releases
+
+Every pull request, every push to `main` and every manual run of the *Build and release* workflow builds the installer and both portable ZIPs and attaches them to the run as artifacts (Actions → the run → Artifacts) - handy for testing a change before it is merged. Pushing a version tag publishes a release from the same build:
+
+```bash
+git tag v1.2 && git push origin v1.2    # -> GitHub Release "FeatherW8-CLI v1.2" with the three files
+```
+
+The tag sets the version of the build (`v1.2` → `1.2.0`); keep `<Version>` in `FeatherW8.csproj`, the default in `installer/FeatherW8.iss`, the header text and the README badges in step with it.
 
 Before distributing a build with ASIO support, review the ASIO SDK redistribution terms — see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md). The FiiO driver is never bundled.
 
