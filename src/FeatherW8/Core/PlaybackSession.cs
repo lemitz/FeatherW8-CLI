@@ -66,6 +66,7 @@ internal sealed class PlaybackSession : IDisposable
     public bool IsStrictOutput => _selection.IsStrict;
     public bool OffersShared => _selection.OffersShared;
     public string OutputLabel => _selection.Label;
+    public OutputKind OutputKind => _selection.Kind;
     public string? OutputNote => _selection.Note;
     // The pause state is tracked here: NAudio's AsioOut reports a paused stream as Stopped after a moment.
     public bool IsPaused => _userPaused;

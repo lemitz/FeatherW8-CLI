@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/lemitz/FeatherW8-CLI/releases"><img src="https://img.shields.io/badge/version-1.0-8b8cff" alt="Version 1.0"></a>
+  <a href="https://github.com/lemitz/FeatherW8-CLI/releases"><img src="https://img.shields.io/badge/version-1.1-8b8cff" alt="Version 1.1"></a>
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011%20x64-0078d4" alt="Windows 10 / 11 x64">
   <img src="https://img.shields.io/badge/built%20with-.NET%2010-512bd4" alt=".NET 10">
   <img src="https://img.shields.io/badge/output-ASIO%20%7C%20WASAPI%20Exclusive-e8590c" alt="ASIO / WASAPI Exclusive">
@@ -32,7 +32,7 @@ FeatherW8 does one thing: it takes the files or folders you hand it and plays th
 This is the whole interface:
 
 ```
-FeatherW8 1.0  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD
+FeatherW8 1.1  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD
 Track 3/12: 03 - Blue in Green.flac
 [=========================>-------------------------------------] 02:14 / 05:37
 Status: playing   Repeat: off
@@ -56,6 +56,7 @@ Output: WASAPI Exclusive — Speakers (FiiO K11)
 - FeatherW8 itself never touches the samples: no resampling, no volume, no DSP. The device has to accept the track's sample rate and format as-is, and the player never converts behind your back
 - When strict output can't start — unsupported sample rate, missing driver, device busy, DAC unplugged mid-track — playback stops and the player asks: `Enter` to continue through WASAPI Shared from the same position (clearly labelled **NOT bit-perfect**), `N` to skip the track, `Q` to quit
 - The active path is always on screen: `Output: ASIO — …`, `ASIO — … — native DSD128`, `ASIO — … — DSD64 via DoP`, `WASAPI Exclusive — …` or `WASAPI Shared — … — NOT bit-perfect`
+- The output line is colour-coded, so the path can be read at a glance: **green** = ASIO, **cyan** = WASAPI Exclusive (both bit-perfect), **red** = WASAPI Shared (NOT bit-perfect). Warnings (e.g. ASIO could not start, Shared enabled) are gold, errors red, prompts that need an answer gold
 - If ASIO was tried but could not start, the reason is shown under the output line instead of being swallowed
 
 **DSD**
@@ -129,6 +130,7 @@ FeatherW8 needs an interactive console window (Windows Terminal and the classic 
 language=auto
 audio.output=auto
 dsd.mode=auto
+ui.color=on
 ```
 
 | Key | Value | Meaning |
@@ -139,6 +141,7 @@ dsd.mode=auto
 | | `asio` | any installed ASIO driver, FiiO first; if none works you are offered Shared, never Exclusive |
 | | `wasapi-exclusive` | WASAPI Exclusive on the Windows default output device (alias: `exclusive`) |
 | | `shared` | WASAPI Shared on the default device — always labelled not bit-perfect (DSD cannot be played this way) |
+| `ui.color` | `on` | colour-coded output line and messages (default); `off` turns the colours off. The `NO_COLOR` environment variable also disables them |
 | `dsd.mode` | `auto` | native DSD on an ASIO driver → DoP over ASIO → DoP over WASAPI Exclusive |
 | | `native` | native DSD only; if the driver cannot do it, the track is not played |
 | | `dop` | DoP only (skip the native attempt) |

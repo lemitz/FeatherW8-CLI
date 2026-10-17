@@ -17,21 +17,39 @@ internal static class TerminalUi
             return;
         }
 
-        var lines = new List<string>
+        var lines = new List<(string Text, ConsoleColor? Color)>
         {
-            Texts.Get("UiHeader"),
-            Texts.Format("TrackLine", player.CurrentIndex + 1, player.TrackCount, Path.GetFileName(player.CurrentPath)),
-            BuildProgress(player, width),
-            Texts.Format("StatusLine", StatusLabel(player), PlayerController.RepeatLabel(player.Repeat)),
-            string.IsNullOrWhiteSpace(player.OutputLabel) ? string.Empty : Texts.Format("AudioModeSelected", player.OutputLabel),
-            Texts.Get("Controls"),
-            player.Message ?? string.Empty,
-            player.Prompt ?? string.Empty
+            (Texts.Get("UiHeader"), null),
+            (Texts.Format("TrackLine", player.CurrentIndex + 1, player.TrackCount, Path.GetFileName(player.CurrentPath)), null),
+            (BuildProgress(player, width), null),
+            (Texts.Format("StatusLine", StatusLabel(player), PlayerController.RepeatLabel(player.Repeat)), null),
+            (string.IsNullOrWhiteSpace(player.OutputLabel) ? string.Empty : Texts.Format("AudioModeSelected", player.OutputLabel), OutputColor(player.OutputKind)),
+            (Texts.Get("Controls"), null),
+            (player.Message ?? string.Empty, MessageColor(player.MessageLevel)),
+            (player.Prompt ?? string.Empty, ConsoleColor.DarkYellow)
         };
 
-        foreach (string line in lines)
-            WriteRow(line, width);
+        foreach ((string text, ConsoleColor? color) in lines)
+            WriteRow(text, width, color);
     }
+
+    /// <summary>
+    /// Green = ASIO, cyan = WASAPI Exclusive (both bit-perfect), red = WASAPI Shared (NOT bit-perfect).
+    /// </summary>
+    private static ConsoleColor? OutputColor(OutputKind kind) => kind switch
+    {
+        OutputKind.Asio => ConsoleColor.Green,
+        OutputKind.WasapiExclusive => ConsoleColor.Cyan,
+        OutputKind.Shared => ConsoleColor.Red,
+        _ => null
+    };
+
+    private static ConsoleColor? MessageColor(MessageLevel level) => level switch
+    {
+        MessageLevel.Error => ConsoleColor.Red,
+        MessageLevel.Warning => ConsoleColor.DarkYellow,
+        _ => null
+    };
 
     private static string BuildProgress(PlayerController player, int terminalWidth)
     {
@@ -70,12 +88,25 @@ internal static class TerminalUi
             : $"{time.Minutes:00}:{time.Seconds:00}";
     }
 
-    private static void WriteRow(string text, int width)
+    private static void WriteRow(string text, int width, ConsoleColor? color)
     {
         if (text.Length > width)
             text = text[..Math.Max(0, width - 1)] + "…";
 
-        Console.Write(text.PadRight(width));
+        bool colored = color is not null && AppSettings.UiColor && text.Length > 0;
+        if (colored)
+            Console.ForegroundColor = color!.Value;
+
+        try
+        {
+            Console.Write(text.PadRight(width));
+        }
+        finally
+        {
+            if (colored)
+                Console.ResetColor();
+        }
+
         Console.WriteLine();
     }
 }
