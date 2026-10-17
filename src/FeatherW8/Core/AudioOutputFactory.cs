@@ -1,3 +1,4 @@
+using FeatherW8.Audio;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 
@@ -5,10 +6,14 @@ namespace FeatherW8.Core;
 
 internal sealed class AudioOutputUnavailableException : Exception
 {
-    public AudioOutputUnavailableException(string message, Exception? innerException = null)
+    public AudioOutputUnavailableException(string message, Exception? innerException = null, bool offersShared = true)
         : base(message, innerException)
     {
+        OffersShared = offersShared;
     }
+
+    /// <summary>False for sources that must never be degraded to the shared mixer (DSD).</summary>
+    public bool OffersShared { get; }
 }
 
 internal sealed class AudioOutputSelection : IDisposable
@@ -25,8 +30,11 @@ internal sealed class AudioOutputSelection : IDisposable
     }
 
     public IWavePlayer Player { get; }
-    public string Label { get; }
+    public string Label { get; set; }
     public bool IsStrict { get; }
+
+    /// <summary>False for DSD: a failed strict output must not be offered as WASAPI Shared.</summary>
+    public bool OffersShared { get; set; } = true;
 
     /// <summary>Explains why a preferred path (ASIO) was skipped; shown to the user.</summary>
     public string? Note { get; set; }
@@ -54,6 +62,9 @@ internal static class AudioOutputFactory
         AudioOutputPreference preference,
         bool forceShared = false)
     {
+        if (source is SynchronizedWaveStream { Inner: DsdWaveStream dsd } synchronizedDsd)
+            return CreateDsd(synchronizedDsd, dsd, preference);
+
         if (forceShared)
             return CreateShared(source, preferExternalUsbDevice: preference is AudioOutputPreference.Auto or AudioOutputPreference.Asio);
         if (preference == AudioOutputPreference.Shared)
@@ -110,6 +121,113 @@ internal static class AudioOutputFactory
         throw new AudioOutputUnavailableException(reason, failures.LastOrDefault());
     }
 
+    /// <summary>
+    /// DSD never goes through the shared mixer. Order: native DSD on an ASIO driver, then DoP
+    /// (DSD packed into 24-bit PCM) over ASIO, then DoP over WASAPI Exclusive.
+    /// </summary>
+    private static AudioOutputSelection CreateDsd(SynchronizedWaveStream source, DsdWaveStream dsd, AudioOutputPreference preference)
+    {
+        if (preference == AudioOutputPreference.Shared)
+            throw new AudioOutputUnavailableException(Texts.Get("AudioModeDsdNoShared"), offersShared: false);
+
+        DsdMode mode = AppSettings.Dsd;
+        var failures = new List<Exception>();
+        string[] drivers = [];
+        List<string> candidates = [];
+
+        if (preference is AudioOutputPreference.Auto or AudioOutputPreference.Asio)
+        {
+            drivers = GetAsioDrivers(failures);
+            candidates = (preference == AudioOutputPreference.Auto
+                ? PreferFiiO(drivers).Where(IsFiiODriver)
+                : PreferFiiO(drivers)).ToList();
+        }
+
+        string? nativeNote = null;
+        if (mode != DsdMode.Dop)
+        {
+            foreach (string driverName in candidates)
+            {
+                try
+                {
+                    return CreateAsioDsd(source, dsd, driverName);
+                }
+                catch (Exception ex)
+                {
+                    failures.Add(ex);
+                }
+            }
+
+            if (failures.Count > 0)
+                nativeNote = Texts.Format("AudioModeDsdNativeSkipped", failures[^1].Message);
+        }
+
+        if (mode != DsdMode.Native)
+        {
+            var dop = new DopWaveProvider(source, dsd.DsdSampleRate, dsd.Channels);
+            string detail = Texts.Format("DopDetail", dop.WaveFormat.SampleRate / 1000.0);
+
+            foreach (string driverName in candidates)
+            {
+                try
+                {
+                    var selection = CreateAsio(dop, driverName);
+                    selection.Label = Texts.Format("AudioModeAsioDopLabel", driverName, dsd.RateLabel, detail);
+                    selection.Note = nativeNote;
+                    selection.OffersShared = false;
+                    return selection;
+                }
+                catch (Exception ex)
+                {
+                    failures.Add(ex);
+                }
+            }
+
+            if (preference is AudioOutputPreference.Auto or AudioOutputPreference.WasapiExclusive)
+            {
+                try
+                {
+                    var selection = CreateWasapiExclusive(dop, preferExternalUsbDevice: preference == AudioOutputPreference.Auto,
+                        out string endpointName);
+                    selection.Label = Texts.Format("AudioModeWasapiDopLabel", endpointName, dsd.RateLabel, detail);
+                    selection.Note = nativeNote;
+                    selection.OffersShared = false;
+                    return selection;
+                }
+                catch (Exception ex)
+                {
+                    failures.Add(ex);
+                }
+            }
+        }
+
+        string reason;
+        if (preference == AudioOutputPreference.Asio && drivers.Length == 0)
+            reason = Texts.Get("AudioModeNoAsioDriver");
+        else if (failures.Count > 0 && failures.All(IsFormatFailure))
+            reason = Texts.Get("AudioModeFormatUnsupported");
+        else
+            reason = Texts.Get("AudioModeDeviceUnavailable");
+
+        throw new AudioOutputUnavailableException(reason, failures.LastOrDefault(), offersShared: false);
+    }
+
+    private static AudioOutputSelection CreateAsioDsd(IWaveProvider source, DsdWaveStream dsd, string driverName)
+    {
+        var output = new NativeDsdAsioPlayer(driverName);
+        try
+        {
+            output.Init(source);
+            string label = Texts.Format("AudioModeAsioDsdLabel", driverName, dsd.RateLabel);
+            return new AudioOutputSelection(output, label, isStrict: true) { OffersShared = false };
+        }
+        catch
+        {
+            try { output.Dispose(); } catch { }
+            throw;
+        }
+    }
+
     private static AudioOutputSelection CreateAsio(IWaveProvider source, string driverName)
     {
         // NAudio 3 retains AsioOut as an IWavePlayer-compatible facade over AsioDevice.
@@ -135,15 +253,19 @@ internal static class AudioOutputFactory
         }
     }
 
-    private static AudioOutputSelection CreateWasapiExclusive(IWaveProvider source, bool preferExternalUsbDevice)
+    private static AudioOutputSelection CreateWasapiExclusive(IWaveProvider source, bool preferExternalUsbDevice) =>
+        CreateWasapiExclusive(source, preferExternalUsbDevice, out _);
+
+    private static AudioOutputSelection CreateWasapiExclusive(IWaveProvider source, bool preferExternalUsbDevice, out string endpointName)
     {
+        endpointName = string.Empty;
         var enumerator = new MMDeviceEnumerator();
         MMDevice? endpoint = null;
         WasapiPlayer? output = null;
 
         try
         {
-            endpoint = SelectRenderEndpoint(enumerator, preferExternalUsbDevice, out string endpointName);
+            endpoint = SelectRenderEndpoint(enumerator, preferExternalUsbDevice, out endpointName);
             output = new WasapiPlayerBuilder()
                 .WithDevice(endpoint)
                 .WithExclusiveMode()

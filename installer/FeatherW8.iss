@@ -54,5 +54,11 @@ Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.ogg\shell\{#Contex
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.ogg\shell\{#ContextVerb}\command"; ValueType: string; ValueData: """{app}\{#AppExeName}"" ""%1"""; Flags: uninsdeletekey; Tasks: filecontext
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.opus\shell\{#ContextVerb}"; ValueType: string; ValueData: "{cm:PlayVerb}"; Flags: uninsdeletekey; Tasks: filecontext
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.opus\shell\{#ContextVerb}\command"; ValueType: string; ValueData: """{app}\{#AppExeName}"" ""%1"""; Flags: uninsdeletekey; Tasks: filecontext
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.flac\shell\{#ContextVerb}"; ValueType: string; ValueData: "{cm:PlayVerb}"; Flags: uninsdeletekey; Tasks: filecontext
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.flac\shell\{#ContextVerb}\command"; ValueType: string; ValueData: """{app}\{#AppExeName}"" ""%1"""; Flags: uninsdeletekey; Tasks: filecontext
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.dsf\shell\{#ContextVerb}"; ValueType: string; ValueData: "{cm:PlayVerb}"; Flags: uninsdeletekey; Tasks: filecontext
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.dsf\shell\{#ContextVerb}\command"; ValueType: string; ValueData: """{app}\{#AppExeName}"" ""%1"""; Flags: uninsdeletekey; Tasks: filecontext
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.dff\shell\{#ContextVerb}"; ValueType: string; ValueData: "{cm:PlayVerb}"; Flags: uninsdeletekey; Tasks: filecontext
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.dff\shell\{#ContextVerb}\command"; ValueType: string; ValueData: """{app}\{#AppExeName}"" ""%1"""; Flags: uninsdeletekey; Tasks: filecontext
 Root: HKCU; Subkey: "Software\Classes\Directory\shell\{#ContextVerb}"; ValueType: string; ValueData: "{cm:FolderVerb}"; Flags: uninsdeletekey; Tasks: filecontext
 Root: HKCU; Subkey: "Software\Classes\Directory\shell\{#ContextVerb}\command"; ValueType: string; ValueData: """{app}\{#AppExeName}"" ""%1"""; Flags: uninsdeletekey; Tasks: filecontext

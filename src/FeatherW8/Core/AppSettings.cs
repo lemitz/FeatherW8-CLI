@@ -16,6 +16,13 @@ internal enum AudioOutputPreference
     Asio
 }
 
+internal enum DsdMode
+{
+    Auto,
+    Native,
+    Dop
+}
+
 /// <summary>
 /// Reads the portable, user-editable settings file beside FeatherW8.exe.
 /// Unknown or malformed values deliberately fall back to safe defaults.
@@ -26,6 +33,7 @@ internal static class AppSettings
 
     public static AppLanguage Language { get; private set; } = AppLanguage.English;
     public static AudioOutputPreference AudioOutput { get; private set; } = AudioOutputPreference.Auto;
+    public static DsdMode Dsd { get; private set; } = DsdMode.Auto;
     public static string SettingsPath => Path.Combine(AppContext.BaseDirectory, "FeatherW8.properties");
 
     public static void Initialize()
@@ -36,6 +44,12 @@ internal static class AppSettings
         Dictionary<string, string> values = ReadProperties(SettingsPath);
         Language = ParseLanguage(values.GetValueOrDefault("language", "auto"));
         AudioOutput = ParseAudioOutput(values.GetValueOrDefault("audio.output", "auto"));
+        Dsd = values.GetValueOrDefault("dsd.mode", "auto").Trim().ToLowerInvariant() switch
+        {
+            "native" => DsdMode.Native,
+            "dop" => DsdMode.Dop,
+            _ => DsdMode.Auto
+        };
         _initialized = true;
     }
 

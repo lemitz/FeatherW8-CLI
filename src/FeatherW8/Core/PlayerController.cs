@@ -6,6 +6,7 @@ internal sealed class PlayerController : IDisposable
     private PlaybackSession? _session;
     private bool _sharedAcceptedForQueue;
     private bool _awaitingFallback;
+    private bool _fallbackOffersShared = true;
     private long _fallbackPosition;
 
     public PlayerController(IReadOnlyList<string> tracks)
@@ -75,11 +76,12 @@ internal sealed class PlayerController : IDisposable
 
         if (_session.Failure is Exception failure)
         {
-            if (_session.IsStrictOutput && !_sharedAcceptedForQueue)
+            if (_session.IsStrictOutput && (!_sharedAcceptedForQueue || !_session.OffersShared))
             {
+                bool offersShared = _session.OffersShared;
                 _fallbackPosition = _session.Position;
                 StopCurrent();
-                BeginFallbackPrompt(Texts.Format("AudioModeStrictUnavailable", failure.Message));
+                BeginFallbackPrompt(Texts.Format("AudioModeStrictUnavailable", failure.Message), offersShared);
                 return;
             }
 
@@ -114,7 +116,7 @@ internal sealed class PlayerController : IDisposable
 
     private void HandleFallbackKey(ConsoleKeyInfo key)
     {
-        if (key.Key == ConsoleKey.Enter)
+        if (key.Key == ConsoleKey.Enter && _fallbackOffersShared)
         {
             _sharedAcceptedForQueue = true;
             _awaitingFallback = false;
@@ -217,9 +219,9 @@ internal sealed class PlayerController : IDisposable
         }
         catch (AudioOutputUnavailableException ex)
         {
-            if (AppSettings.AudioOutput != AudioOutputPreference.Shared && !_sharedAcceptedForQueue)
+            if (!ex.OffersShared || (AppSettings.AudioOutput != AudioOutputPreference.Shared && !_sharedAcceptedForQueue))
             {
-                BeginFallbackPrompt(Texts.Format("AudioModeStrictUnavailable", ex.Message));
+                BeginFallbackPrompt(Texts.Format("AudioModeStrictUnavailable", ex.Message), ex.OffersShared);
             }
             else
             {
@@ -232,11 +234,12 @@ internal sealed class PlayerController : IDisposable
         }
     }
 
-    private void BeginFallbackPrompt(string reason)
+    private void BeginFallbackPrompt(string reason, bool offersShared = true)
     {
         _awaitingFallback = true;
+        _fallbackOffersShared = offersShared;
         Message = reason;
-        Prompt = Texts.Get("AudioModeFallbackPrompt");
+        Prompt = Texts.Get(offersShared ? "AudioModeFallbackPrompt" : "AudioModeFallbackPromptNoShared");
     }
 
     private void SkipCurrentTrack()
