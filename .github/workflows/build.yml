@@ -1,0 +1,111 @@
+name: Build and release
+
+# - every pull request and push to main: build the installer + both portable archives and
+#   attach them to the run as artifacts (Actions -> the run -> Artifacts), so a change can be tested
+# - a tag like v1.1 (or v1.1.0): the same build, then a GitHub Release with the three files
+# - "Run workflow" button: build any branch on demand
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Work out the version
+        id: version
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_REF -like 'refs/tags/v*') {
+            $v = $env:GITHUB_REF_NAME.TrimStart('v')
+            # v1.1 -> 1.1.0 ; v1.2.3 -> 1.2.3
+            if ($v -match '^\d+\.\d+$') { $v = "$v.0" }
+            if ($v -notmatch '^\d+\.\d+\.\d+$') { throw "Tag '$env:GITHUB_REF_NAME' is not a version like v1.2 or v1.2.3" }
+          } else {
+            $v = (Select-Xml -Path src/FeatherW8/FeatherW8.csproj -XPath '//Version').Node.InnerText
+          }
+          "version=$v" >> $env:GITHUB_OUTPUT
+          Write-Host "Version: $v"
+
+      - name: Build (restore, compile)
+        run: dotnet build src/FeatherW8/FeatherW8.csproj --configuration Release -p:Version=${{ steps.version.outputs.version }}
+
+      - name: Publish portable archives
+        shell: pwsh
+        run: ./scripts/publish.ps1 -Version ${{ steps.version.outputs.version }}
+
+      - name: Make sure Inno Setup is available
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) {
+            choco install innosetup --no-progress -y
+          }
+          if (-not (Test-Path $iscc)) { throw 'ISCC.exe not found' }
+          "ISCC=$iscc" >> $env:GITHUB_ENV
+
+      - name: Build the installer
+        shell: pwsh
+        run: |
+          & $env:ISCC "/DAppVersion=${{ steps.version.outputs.version }}" installer\FeatherW8.iss
+          if ($LASTEXITCODE -ne 0) { throw 'ISCC failed' }
+
+      - name: Check the outputs
+        shell: pwsh
+        run: |
+          $expected = 'FeatherW8-Setup-win-x64.exe', 'FeatherW8-Portable-win-x64.zip', 'FeatherW8-Portable-small-requires-dotnet10-win-x64.zip'
+          foreach ($name in $expected) {
+            $file = Join-Path dist $name
+            if (-not (Test-Path $file)) { throw "Missing $file" }
+            '{0,12:N0} bytes  {1}' -f (Get-Item $file).Length, $name
+          }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FeatherW8-${{ steps.version.outputs.version }}-${{ github.run_number }}
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 30
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          ls -l dist
+          gh release create "$TAG" dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "FeatherW8-CLI $TAG" \
+            --generate-notes \
+            --verify-tag
