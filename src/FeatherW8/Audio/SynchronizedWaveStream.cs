@@ -13,8 +13,11 @@ internal sealed class SynchronizedWaveStream : WaveStream
 
     public SynchronizedWaveStream(WaveStream inner) => _inner = inner;
 
-    /// <summary>The wrapped decoder; the output layer uses it to recognise DSD sources.</summary>
+    /// <summary>The wrapped stream (the prefetch buffer, when there is one).</summary>
     public WaveStream Inner => _inner;
+
+    /// <summary>The actual decoder behind any prefetch buffer; the output layer uses it to recognise DSD sources.</summary>
+    public WaveStream Decoder => _inner is PrefetchWaveStream prefetch ? prefetch.Source : _inner;
 
     public override WaveFormat WaveFormat => _inner.WaveFormat;
 
