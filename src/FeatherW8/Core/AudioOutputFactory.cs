@@ -16,6 +16,15 @@ internal sealed class AudioOutputUnavailableException : Exception
     public bool OffersShared { get; }
 }
 
+/// <summary>Which output path is playing; the UI colours the output line by it.</summary>
+internal enum OutputKind
+{
+    None,
+    Asio,
+    WasapiExclusive,
+    Shared
+}
+
 internal sealed class AudioOutputSelection : IDisposable
 {
     private readonly IDisposable? _endpoint;
@@ -32,6 +41,7 @@ internal sealed class AudioOutputSelection : IDisposable
     public IWavePlayer Player { get; }
     public string Label { get; set; }
     public bool IsStrict { get; }
+    public OutputKind Kind { get; init; }
 
     /// <summary>False for DSD: a failed strict output must not be offered as WASAPI Shared.</summary>
     public bool OffersShared { get; set; } = true;
@@ -219,7 +229,7 @@ internal static class AudioOutputFactory
         {
             output.Init(source);
             string label = Texts.Format("AudioModeAsioDsdLabel", driverName, dsd.RateLabel);
-            return new AudioOutputSelection(output, label, isStrict: true) { OffersShared = false };
+            return new AudioOutputSelection(output, label, isStrict: true) { OffersShared = false, Kind = OutputKind.Asio };
         }
         catch
         {
@@ -244,7 +254,7 @@ internal static class AudioOutputFactory
 
             output.Init(source);
             string label = Texts.Format("AudioModeAsioLabel", driverName);
-            return new AudioOutputSelection(output, label, isStrict: true);
+            return new AudioOutputSelection(output, label, isStrict: true) { Kind = OutputKind.Asio };
         }
         catch
         {
@@ -280,7 +290,7 @@ internal static class AudioOutputFactory
 
             output.Init(source);
             string label = Texts.Format("AudioModeWasapiExclusiveLabel", endpointName);
-            var selection = new AudioOutputSelection(output, label, isStrict: true, endpoint);
+            var selection = new AudioOutputSelection(output, label, isStrict: true, endpoint) { Kind = OutputKind.WasapiExclusive };
             output = null;
             endpoint = null;
             return selection;
@@ -323,7 +333,7 @@ internal static class AudioOutputFactory
             output.Init(source);
 
             string label = Texts.Format("AudioModeSharedLabel", endpointName);
-            var selection = new AudioOutputSelection(output, label, isStrict: false, endpoint);
+            var selection = new AudioOutputSelection(output, label, isStrict: false, endpoint) { Kind = OutputKind.Shared };
             output = null;
             endpoint = null;
             return selection;

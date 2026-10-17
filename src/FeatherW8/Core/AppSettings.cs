@@ -34,6 +34,9 @@ internal static class AppSettings
     public static AppLanguage Language { get; private set; } = AppLanguage.English;
     public static AudioOutputPreference AudioOutput { get; private set; } = AudioOutputPreference.Auto;
     public static DsdMode Dsd { get; private set; } = DsdMode.Auto;
+
+    /// <summary>Colour-coded output line and messages. Off with ui.color=off or when NO_COLOR is set.</summary>
+    public static bool UiColor { get; private set; } = true;
     public static string SettingsPath => Path.Combine(AppContext.BaseDirectory, "FeatherW8.properties");
 
     public static void Initialize()
@@ -50,6 +53,8 @@ internal static class AppSettings
             "dop" => DsdMode.Dop,
             _ => DsdMode.Auto
         };
+        bool colorOff = values.GetValueOrDefault("ui.color", "on").Trim().ToLowerInvariant() is "off" or "false" or "no" or "0";
+        UiColor = !colorOff && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("NO_COLOR"));
         _initialized = true;
     }
 

@@ -20,7 +20,7 @@ internal static class Texts
             ["UsageFolderNote"] = ("Folders are scanned one level deep; matching files are sorted by name.", "Папки сканируются только на один уровень; найденные файлы сортируются по имени."),
             ["UsageFormats"] = ("Formats: MP3, WAV, FLAC, Ogg Vorbis, Opus-in-Ogg, DSD (DSF, DSDIFF).", "Форматы: MP3, WAV, FLAC, Ogg Vorbis, Opus-in-Ogg, DSD (DSF, DSDIFF)."),
             ["UsageHelp"] = ("Help: FeatherW8.exe --help", "Для справки: FeatherW8.exe --help"),
-            ["UiHeader"] = ("FeatherW8 1.0  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD", "FeatherW8 1.0  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD"),
+            ["UiHeader"] = ("FeatherW8 1.1  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD", "FeatherW8 1.1  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD"),
             ["TrackLine"] = ("Track {0}/{1}: {2}", "Трек {0}/{1}: {2}"),
             ["StatusLine"] = ("Status: {0}   Repeat: {1}", "Статус: {0}   Повтор: {1}"),
             ["Controls"] = ("↑/↓ track   ←/→ ±5 s (Shift ±30 s)   Space pause   C repeat   Q/Esc quit", "↑/↓ трек   ←/→ ±5 с (Shift ±30 с)   Space пауза   C повтор   Q/Esc выход"),

@@ -1,5 +1,12 @@
 namespace FeatherW8.Core;
 
+internal enum MessageLevel
+{
+    Info,
+    Warning,
+    Error
+}
+
 internal sealed class PlayerController : IDisposable
 {
     private readonly IReadOnlyList<string> _tracks;
@@ -22,9 +29,22 @@ internal sealed class PlayerController : IDisposable
     public int TrackCount => _tracks.Count;
     public RepeatMode Repeat { get; private set; }
     public bool ExitRequested { get; private set; }
-    public string? Message { get; private set; }
+    private string? _message;
+    public string? Message
+    {
+        get => _message;
+        private set
+        {
+            _message = value;
+            MessageLevel = MessageLevel.Info;
+        }
+    }
+
+    /// <summary>How the UI should colour <see cref="Message"/>.</summary>
+    public MessageLevel MessageLevel { get; private set; }
     public string? Prompt { get; private set; }
     public string OutputLabel { get; private set; } = string.Empty;
+    public OutputKind OutputKind { get; private set; }
     public bool AwaitingFallback => _awaitingFallback;
     public bool IsPlaying => _session?.IsPlaying ?? false;
     public bool IsPaused => _session?.IsPaused ?? false;
@@ -85,7 +105,7 @@ internal sealed class PlayerController : IDisposable
                 return;
             }
 
-            Message = Texts.Format("PlaybackError", failure.Message);
+            Fail(Texts.Format("PlaybackError", failure.Message));
             StopCurrent();
             return;
         }
@@ -190,7 +210,7 @@ internal sealed class PlayerController : IDisposable
         }
         catch (Exception ex)
         {
-            Message = Texts.Format("SeekError", ex.Message);
+            Fail(Texts.Format("SeekError", ex.Message));
         }
     }
 
@@ -204,6 +224,7 @@ internal sealed class PlayerController : IDisposable
         _awaitingFallback = false;
         Prompt = null;
         OutputLabel = string.Empty;
+        OutputKind = OutputKind.None;
         CurrentIndex = Math.Clamp(index, 0, _tracks.Count - 1);
         Message = null;
 
@@ -212,10 +233,15 @@ internal sealed class PlayerController : IDisposable
             bool useShared = forceShared || _sharedAcceptedForQueue;
             _session = new PlaybackSession(CurrentPath, useShared, initialPosition);
             OutputLabel = _session.OutputLabel;
+            OutputKind = _session.OutputKind;
             if (!_session.IsStrictOutput)
-                Message = messageAfterStart ?? Texts.Get("AudioModeSharedActive");
+                Warn(messageAfterStart ?? Texts.Get("AudioModeSharedActive"));
             else
-                Message = messageAfterStart ?? _session.OutputNote;
+            {
+                Message = messageAfterStart;
+                if (messageAfterStart is null && _session.OutputNote is string note)
+                    Warn(note); // e.g. why ASIO could not start and WASAPI Exclusive is used instead
+            }
         }
         catch (AudioOutputUnavailableException ex)
         {
@@ -225,20 +251,32 @@ internal sealed class PlayerController : IDisposable
             }
             else
             {
-                Message = Texts.Format("OpenError", Path.GetFileName(CurrentPath), ex.Message);
+                Fail(Texts.Format("OpenError", Path.GetFileName(CurrentPath), ex.Message));
             }
         }
         catch (Exception ex)
         {
-            Message = Texts.Format("OpenError", Path.GetFileName(CurrentPath), ex.Message);
+            Fail(Texts.Format("OpenError", Path.GetFileName(CurrentPath), ex.Message));
         }
+    }
+
+    private void Warn(string text)
+    {
+        Message = text;
+        MessageLevel = MessageLevel.Warning;
+    }
+
+    private void Fail(string text)
+    {
+        Message = text;
+        MessageLevel = MessageLevel.Error;
     }
 
     private void BeginFallbackPrompt(string reason, bool offersShared = true)
     {
         _awaitingFallback = true;
         _fallbackOffersShared = offersShared;
-        Message = reason;
+        Fail(reason);
         Prompt = Texts.Get(offersShared ? "AudioModeFallbackPrompt" : "AudioModeFallbackPromptNoShared");
     }
 
@@ -257,7 +295,7 @@ internal sealed class PlayerController : IDisposable
         }
 
         StopCurrent();
-        Message = Texts.Get("AudioModeTrackSkipped");
+        Warn(Texts.Get("AudioModeTrackSkipped"));
     }
 
     private void StopCurrent()

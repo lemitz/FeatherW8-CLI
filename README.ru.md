@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/lemitz/FeatherW8-CLI/releases"><img src="https://img.shields.io/badge/version-1.0-8b8cff" alt="Версия 1.0"></a>
+  <a href="https://github.com/lemitz/FeatherW8-CLI/releases"><img src="https://img.shields.io/badge/version-1.1-8b8cff" alt="Версия 1.1"></a>
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011%20x64-0078d4" alt="Windows 10 / 11 x64">
   <img src="https://img.shields.io/badge/built%20with-.NET%2010-512bd4" alt=".NET 10">
   <img src="https://img.shields.io/badge/output-ASIO%20%7C%20WASAPI%20Exclusive-e8590c" alt="ASIO / WASAPI Exclusive">
@@ -32,7 +32,7 @@ FeatherW8 делает одну вещь: берёт файлы или папк�
 Весь интерфейс целиком:
 
 ```
-FeatherW8 1.0  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD
+FeatherW8 1.1  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD
 Трек 3/12: 03 - Blue in Green.flac
 [=========================>-------------------------------------] 02:14 / 05:37
 Статус: играет   Повтор: выкл.
@@ -56,6 +56,7 @@ FeatherW8 1.0  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD
 - Сам FeatherW8 к сэмплам не прикасается: ни ресемплинга, ни громкости, ни DSP. Устройство должно принять частоту и формат трека как есть — плеер ничего не конвертирует за твоей спиной
 - Если строгий вывод не запустился — неподдерживаемая частота, нет драйвера, устройство занято, ЦАП выдернули посреди трека — воспроизведение останавливается, и плеер спрашивает: `Enter` — продолжить через WASAPI Shared с того же места (с явной пометкой **НЕ bit-perfect**), `N` — пропустить трек, `Q` — выйти
 - Активный путь вывода всегда виден на экране: `Вывод: ASIO — …`, `ASIO — … — нативный DSD128`, `ASIO — … — DSD64 через DoP`, `WASAPI Exclusive — …` или `WASAPI Shared — … — НЕ bit-perfect`
+- Строка вывода раскрашена, так что путь виден с первого взгляда: **зелёный** = ASIO, **голубой** = WASAPI Exclusive (оба bit-perfect), **красный** = WASAPI Shared (НЕ bit-perfect). Предупреждения (например, ASIO не запустился, включён Shared) — золотистые, ошибки — красные, вопросы, требующие ответа, — золотистые
 - Если ASIO пробовался, но не запустился, причина показывается под строкой вывода, а не глотается молча
 
 **DSD**
@@ -129,6 +130,7 @@ FeatherW8 нужно интерактивное окно консоли (под�
 language=auto
 audio.output=auto
 dsd.mode=auto
+ui.color=on
 ```
 
 | Ключ | Значение | Что делает |
@@ -139,6 +141,7 @@ dsd.mode=auto
 | | `asio` | любой установленный ASIO-драйвер, FiiO в приоритете; если ни один не завёлся — предложит Shared, но не Exclusive |
 | | `wasapi-exclusive` | WASAPI Exclusive на устройстве вывода Windows по умолчанию (синоним: `exclusive`) |
 | | `shared` | WASAPI Shared на устройстве по умолчанию — всегда помечается как не bit-perfect (DSD так играть нельзя) |
+| `ui.color` | `on` | цветная строка вывода и сообщения (по умолчанию); `off` отключает цвета. Переменная окружения `NO_COLOR` тоже их отключает |
 | `dsd.mode` | `auto` | нативный DSD на ASIO-драйвере → DoP по ASIO → DoP по WASAPI Exclusive |
 | | `native` | только нативный DSD; если драйвер не умеет, трек не играет |
 | | `dop` | только DoP (нативную попытку пропустить) |
