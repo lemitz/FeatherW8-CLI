@@ -6,7 +6,7 @@
 
 <p align="center">
   A lightweight, standalone audio player for Windows 10/11 that lives in the terminal.<br>
-  Plays <code>MP3</code>, <code>WAV</code>, <code>Ogg Vorbis</code> and <code>Opus</code> bit-perfect through ASIO or WASAPI Exclusive. No library, no telemetry, no nonsense.
+  Plays <code>MP3</code>, <code>WAV</code>, <code>FLAC</code>, <code>Ogg Vorbis</code>, <code>Opus</code> and <code>DSD</code> (native over ASIO) bit-perfect through ASIO or WASAPI Exclusive. No library, no telemetry, no nonsense.
 </p>
 
 <p align="center">
@@ -32,8 +32,8 @@ FeatherW8 does one thing: it takes the files or folders you hand it and plays th
 This is the whole interface:
 
 ```
-FeatherW8 1.0  |  MP3 · WAV · Ogg Vorbis · Opus
-Track 3/12: 03 - Blue in Green.opus
+FeatherW8 1.0  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD
+Track 3/12: 03 - Blue in Green.flac
 [=========================>-------------------------------------] 02:14 / 05:37
 Status: playing   Repeat: off
 Output: WASAPI Exclusive — Speakers (FiiO K11)
@@ -43,7 +43,7 @@ Output: WASAPI Exclusive — Speakers (FiiO K11)
 ## Features
 
 **Playback**
-- MP3, WAV, Ogg Vorbis and Opus-in-Ogg, mono and stereo. `.ogg` files are sniffed, so Opus inside `.ogg` plays just as well as `.opus`
+- MP3, WAV, **FLAC** (4–24 bit, up to 768 kHz), Ogg Vorbis, Opus-in-Ogg and **DSD** (`.dsf`, `.dff`; DSD64 / DSD128 / DSD256), mono and stereo. `.ogg` files are sniffed, so Opus inside `.ogg` plays just as well as `.opus`
 - Takes any mix of files and folders — from the command line, from the Explorer context menu or dropped onto the launcher
 - Folders are scanned one level deep and sorted by file name; files you pass explicitly keep their order
 - Seek by 5 s or 30 s, pause / resume, repeat off → track → queue
@@ -55,11 +55,19 @@ Output: WASAPI Exclusive — Speakers (FiiO K11)
 - WASAPI Exclusive is opened in raw, event-driven mode with "Pro Audio" MMCSS priority and a 120 ms buffer — past the Windows mixer, APO "enhancements" and any software volume
 - FeatherW8 itself never touches the samples: no resampling, no volume, no DSP. The device has to accept the track's sample rate and format as-is, and the player never converts behind your back
 - When strict output can't start — unsupported sample rate, missing driver, device busy, DAC unplugged mid-track — playback stops and the player asks: `Enter` to continue through WASAPI Shared from the same position (clearly labelled **NOT bit-perfect**), `N` to skip the track, `Q` to quit
-- The active path is always on screen: `Output: ASIO — …`, `WASAPI Exclusive — …` or `WASAPI Shared — … — NOT bit-perfect`
+- The active path is always on screen: `Output: ASIO — …`, `ASIO — … — native DSD128`, `ASIO — … — DSD64 via DoP`, `WASAPI Exclusive — …` or `WASAPI Shared — … — NOT bit-perfect`
+- If ASIO was tried but could not start, the reason is shown under the output line instead of being swallowed
+
+**DSD**
+- **Native DSD** through an ASIO driver that supports it (ASIO 2.2 DSD mode, `DSDInt8MSB1`) — the 1-bit stream reaches the driver untouched. Verified with the FiiO ASIO driver (K11): DSD64, DSD128 and DSD256
+- **DoP** (DSD over PCM, 24-bit with the `0x05`/`0xFA` markers) over ASIO or WASAPI Exclusive when native DSD is not available — for DACs and drivers without ASIO DSD. DoP needs the PCM path to be bit-perfect and a rate of DSD rate ÷ 16 (176.4 kHz for DSD64, 352.8 kHz for DSD128)
+- DSF (LSB-first bits) and DSDIFF (`.dff`, uncompressed) are both read; the bit order is normalised losslessly. DST-compressed DSDIFF is not supported
+- DSD is **never** sent through WASAPI Shared (it would turn into noise): if no strict path works the player offers only `N` skip / `Q` quit
+- DSD cannot be attenuated in software, so it is played at the level stored in the file — keep the DAC's volume low when you try a new file
 
 **Everything else**
 - One executable and one plain-text settings file next to it; the portable build and the installed one behave identically
-- Optional Explorer context menu — *Play in FeatherW8* for `.mp3` / `.wav` / `.ogg` / `.opus` and *Open folder in FeatherW8* for folders — registered for the current user only, without admin rights and without touching default apps
+- Optional Explorer context menu — *Play in FeatherW8* for `.mp3` / `.wav` / `.flac` / `.ogg` / `.opus` / `.dsf` / `.dff` and *Open folder in FeatherW8* for folders — registered for the current user only, without admin rights and without touching default apps
 - `--help`, meaningful exit codes (`0` ok, `1` playback error, `2` wrong usage or nothing to play), environment variables in paths are expanded
 - No telemetry, no network access, no background service; the player itself never writes to disk or the registry (the only registry entries are the optional context-menu keys under `HKCU`)
 
@@ -120,6 +128,7 @@ FeatherW8 needs an interactive console window (Windows Terminal and the classic 
 ```properties
 language=auto
 audio.output=auto
+dsd.mode=auto
 ```
 
 | Key | Value | Meaning |
@@ -129,7 +138,10 @@ audio.output=auto
 | `audio.output` | `auto` | FiiO ASIO → WASAPI Exclusive → ask before Shared |
 | | `asio` | any installed ASIO driver, FiiO first; if none works you are offered Shared, never Exclusive |
 | | `wasapi-exclusive` | WASAPI Exclusive on the Windows default output device (alias: `exclusive`) |
-| | `shared` | WASAPI Shared on the default device — always labelled not bit-perfect |
+| | `shared` | WASAPI Shared on the default device — always labelled not bit-perfect (DSD cannot be played this way) |
+| `dsd.mode` | `auto` | native DSD on an ASIO driver → DoP over ASIO → DoP over WASAPI Exclusive |
+| | `native` | native DSD only; if the driver cannot do it, the track is not played |
+| | `dop` | DoP only (skip the native attempt) |
 
 ## How the output path is chosen
 
@@ -145,6 +157,8 @@ audio.output = auto
 - If a strict session dies mid-track (the DAC was unplugged, the driver went away), the same question appears and `Enter` resumes from the position where it stopped.
 - With several non-FiiO USB devices FeatherW8 does not guess and uses the Windows default device — set your DAC as the default output in Windows.
 - `auto` only looks at FiiO/K11 ASIO drivers. To use another ASIO driver, set `audio.output=asio`.
+- ASIO drivers are COM objects, so the whole player runs on one STA thread; this is also why a failed ASIO start is always reported rather than silently replaced by WASAPI.
+- DSD files follow the same order with one more step in front: native DSD on the ASIO driver → DoP over ASIO → DoP over WASAPI Exclusive → stop and ask (skip / quit, never Shared).
 
 What actually reaches the DAC:
 
@@ -154,8 +168,14 @@ What actually reaches the DAC:
 | MP3 | Windows Media Foundation | 16-bit PCM at the file's sample rate |
 | Ogg Vorbis | NVorbis | 32-bit float at the file's sample rate |
 | Opus | Concentus | 16-bit PCM at 48 kHz (Opus' native rate) |
+| FLAC | built-in decoder | 16-bit PCM for 4–16 bit files, 24-bit PCM for 17–24 bit files, at the file's sample rate; narrower depths are only left-aligned (lossless) |
+| DSF / DSDIFF | built-in reader | native: the raw 1-bit stream (`DSDInt8MSB1`) at the DSD rate; DoP: 24-bit PCM at DSD rate ÷ 16 |
 
 ASIO and WASAPI Exclusive guarantee that FeatherW8 adds nothing between the decoder and the driver — no mixer, no resampler, no gain. What a particular driver or DAC does internally is outside its control, and lossy formats are of course decoded to PCM first; "bit-perfect" there means the decoder's output is delivered unchanged. Not every device accepts 32-bit float in exclusive mode — if yours doesn't, Vorbis files will trigger the Shared question.
+
+The FLAC decoder is written from scratch and checked bit for bit: every file of the [IETF FLAC decoder test suite](https://github.com/ietf-wg-cellar/flac-test-files) that FeatherW8 can play (8/12/15/16/20/24 bit, 22.05–768 kHz, mono/stereo, fixed and variable block sizes, wasted bits, escape codes) decodes to exactly the MD5 stored in its STREAMINFO.
+
+A note on the FiiO K11: its Windows (WASAPI) endpoint accepts only 16-bit PCM in exclusive mode (up to 384 kHz); 24-bit and 32-bit formats are offered by the ASIO driver only. 24-bit FLAC and all DSD therefore need the FiiO ASIO driver on that DAC.
 
 ## Development
 
@@ -186,6 +206,7 @@ Before distributing a build with ASIO support, review the ASIO SDK redistributio
 ## Known limitations
 
 - Windows 10/11 x64 only.
+- FLAC and DSD are limited to mono/stereo; FLAC up to 24 bit (no 32-bit), no change of format inside one FLAC stream. DSD512, DST-compressed DSDIFF and DSD playback through WASAPI Shared are not supported. Native DSD needs an ASIO driver with DSD support; every other path uses DoP.
 - No recursive folder scan, M3U/CUE, shuffle, tag reading (the file name is shown) or volume control — the last one on purpose: software volume would break bit-perfect output. Use the knob on the DAC.
 - Seeking in Opus re-decodes the stream from the beginning, so a seek in a long file can take a moment. Opus is limited to mono/stereo.
 - The Vorbis decoder (NVorbis) has upstream quirks when seeking to the very end of a file and back to the start.
@@ -201,12 +222,16 @@ src/FeatherW8/
   Core/
     PlayerController.cs        queue navigation, key handling, repeat modes, the Shared fallback prompt
     PlaybackSession.cs         one track = one session: decoder + output device, seek, pause
-    AudioOutputFactory.cs      ASIO / WASAPI Exclusive / Shared selection and endpoint matching
+    AudioOutputFactory.cs      ASIO / WASAPI Exclusive / Shared selection and endpoint matching, DSD path order
+    NativeDsdAsioPlayer.cs     native DSD over ASIO (kAsioSetIoFormat, DSDInt8MSB1) on top of NAudio's AsioDriver
     TrackQueueBuilder.cs       files and folders from the command line → sorted queue
     AppSettings.cs             FeatherW8.properties parser
     Texts.cs                   embedded English / Russian message catalog
   Audio/
     AudioSourceFactory.cs      picks a decoder by extension, sniffs .ogg for Opus vs Vorbis
+    FlacWaveStream.cs          seekable FLAC decoder (CRC-checked, bit-exact), seeks by bisecting frame headers
+    DsdWaveStream.cs           DSF / DSDIFF reader: raw 1-bit stream, channel-interleaved, MSB first
+    DopWaveProvider.cs         packs DSD into 24-bit DoP PCM for the PCM output paths
     OggOpusWaveStream.cs       seekable Opus-in-Ogg → PCM stream on top of Concentus
     SynchronizedWaveStream.cs  serializes decoder reads with seeks from the UI thread
   UI/
