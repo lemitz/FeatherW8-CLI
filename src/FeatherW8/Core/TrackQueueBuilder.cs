@@ -4,7 +4,7 @@ internal static class TrackQueueBuilder
 {
     private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
-        ".mp3", ".wav", ".ogg", ".opus"
+        ".mp3", ".wav", ".ogg", ".opus", ".flac", ".fla"
     };
 
     public static List<string> Build(IEnumerable<string> arguments, TextWriter diagnostics)
