@@ -13,6 +13,9 @@ internal sealed class SynchronizedWaveStream : WaveStream
 
     public SynchronizedWaveStream(WaveStream inner) => _inner = inner;
 
+    /// <summary>The wrapped decoder; the output layer uses it to recognise DSD sources.</summary>
+    public WaveStream Inner => _inner;
+
     public override WaveFormat WaveFormat => _inner.WaveFormat;
 
     public override long Length

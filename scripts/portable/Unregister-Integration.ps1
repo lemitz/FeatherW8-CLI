@@ -6,6 +6,9 @@ $paths = @(
     'HKCU:\Software\Classes\SystemFileAssociations\.wav\shell\' + $verb,
     'HKCU:\Software\Classes\SystemFileAssociations\.ogg\shell\' + $verb,
     'HKCU:\Software\Classes\SystemFileAssociations\.opus\shell\' + $verb,
+    'HKCU:\Software\Classes\SystemFileAssociations\.flac\shell\' + $verb,
+    'HKCU:\Software\Classes\SystemFileAssociations\.dsf\shell\' + $verb,
+    'HKCU:\Software\Classes\SystemFileAssociations\.dff\shell\' + $verb,
     'HKCU:\Software\Classes\Directory\shell\' + $verb
 )
 

@@ -18,6 +18,7 @@ internal sealed class PlaybackSession : IDisposable
     private int _ended;
     private int _disposing;
     private volatile Exception? _failure;
+    private volatile bool _userPaused;
 
     public PlaybackSession(string path, bool forceShared = false, long initialPosition = 0)
     {
@@ -42,6 +43,7 @@ internal sealed class PlaybackSession : IDisposable
         catch (Exception ex)
         {
             bool strictOutputWasSelected = selection?.IsStrict == true;
+            bool offersShared = selection?.OffersShared ?? true;
             if (selection is not null)
             {
                 try { selection.Player.PlaybackStopped -= OnPlaybackStopped; } catch { }
@@ -50,7 +52,7 @@ internal sealed class PlaybackSession : IDisposable
             try { synchronizedSource.Dispose(); } catch { }
 
             if (strictOutputWasSelected && ex is not AudioOutputUnavailableException)
-                throw new AudioOutputUnavailableException(Texts.Get("AudioModeDeviceUnavailable"), ex);
+                throw new AudioOutputUnavailableException(Texts.Get("AudioModeDeviceUnavailable"), ex, offersShared);
             throw;
         }
 
@@ -62,9 +64,12 @@ internal sealed class PlaybackSession : IDisposable
     public bool Ended => Volatile.Read(ref _ended) != 0;
     public Exception? Failure => _failure;
     public bool IsStrictOutput => _selection.IsStrict;
+    public bool OffersShared => _selection.OffersShared;
     public string OutputLabel => _selection.Label;
-    public bool IsPaused => _output.PlaybackState == PlaybackState.Paused;
-    public bool IsPlaying => _output.PlaybackState == PlaybackState.Playing;
+    public string? OutputNote => _selection.Note;
+    // The pause state is tracked here: NAudio's AsioOut reports a paused stream as Stopped after a moment.
+    public bool IsPaused => _userPaused;
+    public bool IsPlaying => !_userPaused && _output.PlaybackState == PlaybackState.Playing;
     public long Position => _source.Position;
     public long Length => _source.Length;
     public WaveFormat WaveFormat => _source.WaveFormat;
@@ -74,10 +79,16 @@ internal sealed class PlaybackSession : IDisposable
 
     public void TogglePause()
     {
-        if (_output.PlaybackState == PlaybackState.Playing)
-            _output.Pause();
-        else if (_output.PlaybackState == PlaybackState.Paused)
+        if (_userPaused)
+        {
             _output.Play();
+            _userPaused = false;
+        }
+        else if (_output.PlaybackState == PlaybackState.Playing)
+        {
+            _output.Pause();
+            _userPaused = true;
+        }
     }
 
     public void SeekBy(TimeSpan delta)
@@ -128,6 +139,8 @@ internal sealed class PlaybackSession : IDisposable
     {
         if (e.Exception is not null)
             _failure = e.Exception;
+        else if (_userPaused)
+            return; // a driver that stops itself while paused has not reached the end of the track
 
         if (Volatile.Read(ref _disposing) == 0)
             Interlocked.Exchange(ref _ended, 1);

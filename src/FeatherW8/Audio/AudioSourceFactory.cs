@@ -21,6 +21,18 @@ internal static class AudioSourceFactory
             return new WaveFileReader(path);
         }
 
+        if (extension.Equals(".flac", StringComparison.OrdinalIgnoreCase) ||
+            extension.Equals(".fla", StringComparison.OrdinalIgnoreCase))
+        {
+            return new FlacWaveStream(path);
+        }
+
+        if (extension.Equals(".dsf", StringComparison.OrdinalIgnoreCase) ||
+            extension.Equals(".dff", StringComparison.OrdinalIgnoreCase))
+        {
+            return new DsdWaveStream(path);
+        }
+
         if (extension.Equals(".opus", StringComparison.OrdinalIgnoreCase))
         {
             return new OggOpusWaveStream(path);

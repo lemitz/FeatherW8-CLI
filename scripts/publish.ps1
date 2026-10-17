@@ -1,5 +1,13 @@
+param(
+    # Optional assembly/file version (e.g. 1.1.0); defaults to the version in the .csproj.
+    [string]$Version
+)
+
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+
+$versionArgs = @()
+if ($Version) { $versionArgs = @("-p:Version=$Version") }
 
 $root = Split-Path -Parent $PSScriptRoot
 $project = Join-Path $root 'src\FeatherW8\FeatherW8.csproj'
@@ -24,7 +32,9 @@ dotnet publish $project `
     -p:PublishTrimmed=false `
     -p:DebugType=None `
     -p:DebugSymbols=false `
+    @versionArgs `
     --output $selfContainedDir
+if ($LASTEXITCODE -ne 0) { throw 'dotnet publish (self-contained) failed' }
 
 # Smaller alternative: requires the .NET 10 runtime to already be installed.
 dotnet publish $project `
@@ -35,7 +45,9 @@ dotnet publish $project `
     -p:PublishTrimmed=false `
     -p:DebugType=None `
     -p:DebugSymbols=false `
+    @versionArgs `
     --output $frameworkDependentDir
+if ($LASTEXITCODE -ne 0) { throw 'dotnet publish (framework-dependent) failed' }
 
 # Ship the Explorer helpers beside the EXE so they continue to work from any extracted folder.
 $helperDir = Join-Path $PSScriptRoot 'portable'
