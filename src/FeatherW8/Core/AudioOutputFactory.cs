@@ -72,7 +72,7 @@ internal static class AudioOutputFactory
         AudioOutputPreference preference,
         bool forceShared = false)
     {
-        if (source is SynchronizedWaveStream { Inner: DsdWaveStream dsd } synchronizedDsd)
+        if (source is SynchronizedWaveStream { Decoder: DsdWaveStream dsd } synchronizedDsd)
             return CreateDsd(synchronizedDsd, dsd, preference);
 
         if (forceShared)

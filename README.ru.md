@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/lemitz/FeatherW8-CLI/releases"><img src="https://img.shields.io/badge/version-1.1-8b8cff" alt="Версия 1.1"></a>
+  <a href="https://github.com/lemitz/FeatherW8-CLI/releases"><img src="https://img.shields.io/badge/version-1.1.1-8b8cff" alt="Версия 1.1.1"></a>
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011%20x64-0078d4" alt="Windows 10 / 11 x64">
   <img src="https://img.shields.io/badge/built%20with-.NET%2010-512bd4" alt=".NET 10">
   <img src="https://img.shields.io/badge/output-ASIO%20%7C%20WASAPI%20Exclusive-e8590c" alt="ASIO / WASAPI Exclusive">
@@ -32,7 +32,7 @@ FeatherW8 делает одну вещь: берёт файлы или папк�
 Весь интерфейс целиком:
 
 ```
-FeatherW8 1.1  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD
+FeatherW8 1.1.1  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD
 Трек 3/12: 03 - Blue in Green.flac
 [=========================>-------------------------------------] 02:14 / 05:37
 Статус: играет   Повтор: выкл.
@@ -47,6 +47,7 @@ FeatherW8 1.1  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD
 - Принимает любую смесь файлов и папок — из командной строки, из контекстного меню Проводника или перетаскиванием на launcher
 - Папки сканируются на один уровень вглубь и сортируются по имени файла; файлы, переданные явно, сохраняют свой порядок
 - Перемотка на 5 или 30 секунд, пауза / продолжение, повтор выкл. → трек → очередь
+- Декодирование идёт на опережение в отдельном потоке в буфер на ~4 с, поэтому медленный или занятый диск (HDD, антивирус, загрузка) не может заставить музыку заикаться — аудио-колбэк только копирует готовые сэмплы
 - Прогресс-бар на всю ширину окна с прошедшим / общим временем, перерисовывается каждые 80 мс
 - Интерфейс на русском, если язык интерфейса Windows русский, иначе на английском (в настройках можно задать принудительно)
 
@@ -248,6 +249,7 @@ src/FeatherW8/
     DsdWaveStream.cs           ридер DSF / DSDIFF: «сырой» 1-бит поток, каналы вперемешку, MSB первым
     DopWaveProvider.cs         упаковывает DSD в 24-бит DoP-PCM для PCM-путей вывода
     OggOpusWaveStream.cs       перематываемый поток Opus-in-Ogg → PCM поверх Concentus
+    PrefetchWaveStream.cs      декодирует на опережение в отдельном потоке в кольцевой буфер на ~4 с (убирает дисковый ввод-вывод из аудио-колбэка)
     SynchronizedWaveStream.cs  сериализует чтение декодера и перемотку из UI-потока
   UI/
     TerminalUi.cs              рисует экран: шапка, трек, прогресс-бар, статус, подсказки

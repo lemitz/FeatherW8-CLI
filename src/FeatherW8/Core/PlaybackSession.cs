@@ -23,7 +23,9 @@ internal sealed class PlaybackSession : IDisposable
     public PlaybackSession(string path, bool forceShared = false, long initialPosition = 0)
     {
         WaveStream rawSource = AudioSourceFactory.Open(path);
-        var synchronizedSource = new SynchronizedWaveStream(rawSource);
+        // Decode ahead on a worker thread so the real-time audio callback never waits for the disk.
+        var prefetch = new PrefetchWaveStream(rawSource);
+        var synchronizedSource = new SynchronizedWaveStream(prefetch);
         AudioOutputSelection? selection = null;
 
         try
@@ -38,6 +40,7 @@ internal sealed class PlaybackSession : IDisposable
 
             selection = AudioOutputFactory.Create(synchronizedSource, AppSettings.AudioOutput, forceShared);
             selection.Player.PlaybackStopped += OnPlaybackStopped;
+            prefetch.WaitUntilBuffered(0.5, 3000); // do not start on an empty buffer
             selection.Player.Play();
         }
         catch (Exception ex)
