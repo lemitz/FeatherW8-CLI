@@ -1,7 +1,7 @@
-#define AppName "FeatherW8"
+﻿#define AppName "FeatherW8"
 ; CI passes the release version with: iscc /DAppVersion=1.2.3 installer\FeatherW8.iss
 #ifndef AppVersion
-  #define AppVersion "1.2.0"
+  #define AppVersion "1.2.1"
 #endif
 #define AppExeName "FeatherW8.exe"
 #define ContextVerb "FeatherW8.Play"
@@ -50,18 +50,26 @@ Name: "{group}\{cm:HelpShortcut}"; Filename: "{app}\{#AppExeName}"; Parameters: 
 
 [Registry]
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.mp3\shell\{#ContextVerb}"; ValueType: string; ValueData: "{cm:PlayVerb}"; Flags: uninsdeletekey; Tasks: filecontext
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.mp3\shell\{#ContextVerb}"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\{#AppExeName}"",0"; Flags: uninsdeletekey; Tasks: filecontext
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.mp3\shell\{#ContextVerb}\command"; ValueType: string; ValueData: """{app}\{#AppExeName}"" ""%1"""; Flags: uninsdeletekey; Tasks: filecontext
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.wav\shell\{#ContextVerb}"; ValueType: string; ValueData: "{cm:PlayVerb}"; Flags: uninsdeletekey; Tasks: filecontext
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.wav\shell\{#ContextVerb}"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\{#AppExeName}"",0"; Flags: uninsdeletekey; Tasks: filecontext
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.wav\shell\{#ContextVerb}\command"; ValueType: string; ValueData: """{app}\{#AppExeName}"" ""%1"""; Flags: uninsdeletekey; Tasks: filecontext
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.ogg\shell\{#ContextVerb}"; ValueType: string; ValueData: "{cm:PlayVerb}"; Flags: uninsdeletekey; Tasks: filecontext
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.ogg\shell\{#ContextVerb}"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\{#AppExeName}"",0"; Flags: uninsdeletekey; Tasks: filecontext
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.ogg\shell\{#ContextVerb}\command"; ValueType: string; ValueData: """{app}\{#AppExeName}"" ""%1"""; Flags: uninsdeletekey; Tasks: filecontext
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.opus\shell\{#ContextVerb}"; ValueType: string; ValueData: "{cm:PlayVerb}"; Flags: uninsdeletekey; Tasks: filecontext
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.opus\shell\{#ContextVerb}"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\{#AppExeName}"",0"; Flags: uninsdeletekey; Tasks: filecontext
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.opus\shell\{#ContextVerb}\command"; ValueType: string; ValueData: """{app}\{#AppExeName}"" ""%1"""; Flags: uninsdeletekey; Tasks: filecontext
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.flac\shell\{#ContextVerb}"; ValueType: string; ValueData: "{cm:PlayVerb}"; Flags: uninsdeletekey; Tasks: filecontext
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.flac\shell\{#ContextVerb}"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\{#AppExeName}"",0"; Flags: uninsdeletekey; Tasks: filecontext
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.flac\shell\{#ContextVerb}\command"; ValueType: string; ValueData: """{app}\{#AppExeName}"" ""%1"""; Flags: uninsdeletekey; Tasks: filecontext
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.dsf\shell\{#ContextVerb}"; ValueType: string; ValueData: "{cm:PlayVerb}"; Flags: uninsdeletekey; Tasks: filecontext
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.dsf\shell\{#ContextVerb}"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\{#AppExeName}"",0"; Flags: uninsdeletekey; Tasks: filecontext
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.dsf\shell\{#ContextVerb}\command"; ValueType: string; ValueData: """{app}\{#AppExeName}"" ""%1"""; Flags: uninsdeletekey; Tasks: filecontext
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.dff\shell\{#ContextVerb}"; ValueType: string; ValueData: "{cm:PlayVerb}"; Flags: uninsdeletekey; Tasks: filecontext
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.dff\shell\{#ContextVerb}"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\{#AppExeName}"",0"; Flags: uninsdeletekey; Tasks: filecontext
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.dff\shell\{#ContextVerb}\command"; ValueType: string; ValueData: """{app}\{#AppExeName}"" ""%1"""; Flags: uninsdeletekey; Tasks: filecontext
 Root: HKCU; Subkey: "Software\Classes\Directory\shell\{#ContextVerb}"; ValueType: string; ValueData: "{cm:FolderVerb}"; Flags: uninsdeletekey; Tasks: filecontext
+Root: HKCU; Subkey: "Software\Classes\Directory\shell\{#ContextVerb}"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\{#AppExeName}"",0"; Flags: uninsdeletekey; Tasks: filecontext
 Root: HKCU; Subkey: "Software\Classes\Directory\shell\{#ContextVerb}\command"; ValueType: string; ValueData: """{app}\{#AppExeName}"" ""%1"""; Flags: uninsdeletekey; Tasks: filecontext

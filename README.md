@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/lemitz/FeatherW8-CLI/releases"><img src="https://img.shields.io/badge/version-1.2.0-8b8cff" alt="Version 1.2.0"></a>
+  <a href="https://github.com/lemitz/FeatherW8-CLI/releases"><img src="https://img.shields.io/badge/version-1.2.1-8b8cff" alt="Version 1.2.1"></a>
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011%20x64-0078d4" alt="Windows 10 / 11 x64">
   <img src="https://img.shields.io/badge/built%20with-.NET%2010-512bd4" alt=".NET 10">
   <img src="https://img.shields.io/badge/output-ASIO%20%7C%20WASAPI%20Exclusive-e8590c" alt="ASIO / WASAPI Exclusive">
@@ -32,7 +32,7 @@ FeatherW8 does one thing: it takes the files or folders you hand it and plays th
 This is the whole interface:
 
 ```
-FeatherW8 1.2.0  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD
+FeatherW8 1.2.1  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD
 Track 3/12: 03 - Blue in Green.flac
 [=========================>-------------------------------------] 02:14 / 05:37
 Status: playing   Repeat: off
@@ -70,7 +70,7 @@ Output: ASIO — FiiO ASIO Driver
 
 **Everything else**
 - One executable and one plain-text settings file next to it; the portable build and the installed one behave identically
-- Optional Explorer context menu — *Play in FeatherW8* for `.mp3` / `.wav` / `.flac` / `.ogg` / `.opus` / `.dsf` / `.dff` and *Open folder in FeatherW8* for folders — registered for the current user only, without admin rights and without touching default apps
+- Optional Explorer context menu (with the FeatherW8 icon) — *Play in FeatherW8* for `.mp3` / `.wav` / `.flac` / `.ogg` / `.opus` / `.dsf` / `.dff` and *Open folder in FeatherW8* for folders — registered for the current user only, without admin rights and without touching default apps
 - `--help`, meaningful exit codes (`0` ok, `1` playback error, `2` wrong usage or nothing to play), environment variables in paths are expanded
 - No telemetry, no network access, no background service; the player itself never writes to disk or the registry (the only registry entries are the optional context-menu keys under `HKCU`)
 
@@ -251,6 +251,7 @@ src/FeatherW8/
     DsdWaveStream.cs           DSF / DSDIFF reader: raw 1-bit stream, channel-interleaved, MSB first
     DopWaveProvider.cs         packs DSD into 24-bit DoP PCM for the PCM output paths
     OggOpusWaveStream.cs       seekable Opus-in-Ogg → PCM stream on top of Concentus
+    TailPaddedProvider.cs      full buffers for the device + silent tail; detects the end of the track itself (queue autoplay)
     PrefetchWaveStream.cs      decodes ahead on a worker thread into a ~4 s ring buffer (keeps disk I/O out of the audio callback)
     SynchronizedWaveStream.cs  serializes decoder reads with seeks from the UI thread
   UI/

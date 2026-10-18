@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 
 $player = Join-Path $PSScriptRoot 'FeatherW8.exe'
 if (-not (Test-Path -LiteralPath $player -PathType Leaf)) {
@@ -33,11 +33,13 @@ $folderLabel = if ($isRussian) { 'Открыть папку в FeatherW8' } else
 $verb = 'FeatherW8.Play'
 $extensions = @('.mp3', '.wav', '.flac', '.ogg', '.opus', '.dsf', '.dff')
 $command = '"' + $player + '" "%1"'
+$icon = '"' + $player + '",0'   # the menu entry shows the player's icon
 
 foreach ($extension in $extensions) {
     $key = "HKCU:\Software\Classes\SystemFileAssociations\$extension\shell\$verb"
     New-Item -Path $key -Force | Out-Null
     Set-Item -Path $key -Value $playLabel
+    Set-ItemProperty -Path $key -Name 'Icon' -Value $icon
     New-Item -Path "$key\command" -Force | Out-Null
     Set-Item -Path "$key\command" -Value $command
 }
@@ -45,6 +47,7 @@ foreach ($extension in $extensions) {
 $folderKey = "HKCU:\Software\Classes\Directory\shell\$verb"
 New-Item -Path $folderKey -Force | Out-Null
 Set-Item -Path $folderKey -Value $folderLabel
+Set-ItemProperty -Path $folderKey -Name 'Icon' -Value $icon
 New-Item -Path "$folderKey\command" -Force | Out-Null
 Set-Item -Path "$folderKey\command" -Value $command
 

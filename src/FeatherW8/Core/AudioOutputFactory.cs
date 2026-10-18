@@ -43,6 +43,15 @@ internal sealed class AudioOutputSelection : IDisposable
     public bool IsStrict { get; }
     public OutputKind Kind { get; init; }
 
+    /// <summary>Raised (on the audio thread) when the track has been played to its end.</summary>
+    public event EventHandler? Finished;
+
+    internal AudioOutputSelection BindEnd(TailPaddedProvider provider)
+    {
+        provider.Finished += (_, _) => Finished?.Invoke(this, EventArgs.Empty);
+        return this;
+    }
+
     /// <summary>False for DSD: a failed strict output must not be offered as WASAPI Shared.</summary>
     public bool OffersShared { get; set; } = true;
 
@@ -242,6 +251,7 @@ internal static class AudioOutputFactory
     {
         // NAudio 3 retains AsioOut as an IWavePlayer-compatible facade over AsioDevice.
         // Using the facade keeps seek, pause, stop, and error handling on the same path as WASAPI.
+        var padded = new TailPaddedProvider(source); // the track end is detected by the player, not by NAudio
 #pragma warning disable CS0618
         var output = new AsioOut(driverName);
 #pragma warning restore CS0618
@@ -252,9 +262,9 @@ internal static class AudioOutputFactory
             if (!output.IsSampleRateSupported(source.WaveFormat.SampleRate))
                 throw new NotSupportedException(Texts.Get("AudioModeFormatUnsupported"));
 
-            output.Init(source);
+            output.Init(padded);
             string label = Texts.Format("AudioModeAsioLabel", driverName);
-            return new AudioOutputSelection(output, label, isStrict: true) { Kind = OutputKind.Asio };
+            return new AudioOutputSelection(output, label, isStrict: true) { Kind = OutputKind.Asio }.BindEnd(padded);
         }
         catch
         {
@@ -269,6 +279,7 @@ internal static class AudioOutputFactory
     private static AudioOutputSelection CreateWasapiExclusive(IWaveProvider source, bool preferExternalUsbDevice, out string endpointName)
     {
         endpointName = string.Empty;
+        var padded = new TailPaddedProvider(source);
         var enumerator = new MMDeviceEnumerator();
         MMDevice? endpoint = null;
         WasapiPlayer? output = null;
@@ -288,9 +299,9 @@ internal static class AudioOutputFactory
             if (!output.IsFormatSupported(source.WaveFormat))
                 throw new NotSupportedException(Texts.Get("AudioModeFormatUnsupported"));
 
-            output.Init(source);
+            output.Init(padded);
             string label = Texts.Format("AudioModeWasapiExclusiveLabel", endpointName);
-            var selection = new AudioOutputSelection(output, label, isStrict: true, endpoint) { Kind = OutputKind.WasapiExclusive };
+            var selection = new AudioOutputSelection(output, label, isStrict: true, endpoint) { Kind = OutputKind.WasapiExclusive }.BindEnd(padded);
             output = null;
             endpoint = null;
             return selection;
@@ -317,6 +328,7 @@ internal static class AudioOutputFactory
 
     private static AudioOutputSelection CreateShared(IWaveProvider source, bool preferExternalUsbDevice)
     {
+        var padded = new TailPaddedProvider(source);
         var enumerator = new MMDeviceEnumerator();
         MMDevice? endpoint = null;
         WasapiPlayer? output = null;
@@ -330,10 +342,10 @@ internal static class AudioOutputFactory
                 .WithEventSync()
                 .WithLatency(120)
                 .Build();
-            output.Init(source);
+            output.Init(padded);
 
             string label = Texts.Format("AudioModeSharedLabel", endpointName);
-            var selection = new AudioOutputSelection(output, label, isStrict: false, endpoint) { Kind = OutputKind.Shared };
+            var selection = new AudioOutputSelection(output, label, isStrict: false, endpoint) { Kind = OutputKind.Shared }.BindEnd(padded);
             output = null;
             endpoint = null;
             return selection;

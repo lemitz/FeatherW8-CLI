@@ -8,7 +8,7 @@ namespace FeatherW8.Audio;
 /// payload as native DSD; the PCM path in between (ASIO or WASAPI Exclusive) must be bit-perfect.
 /// The PCM rate is the DSD rate / 16: 176.4 kHz for DSD64, 352.8 kHz for DSD128, 705.6 kHz for DSD256.
 /// </summary>
-internal sealed class DopWaveProvider : IWaveProvider
+internal sealed class DopWaveProvider : IWaveProvider, ISilenceSource
 {
     private const byte MarkerA = 0x05;
     private const byte MarkerB = 0xFA;
@@ -27,6 +27,29 @@ internal sealed class DopWaveProvider : IWaveProvider
     }
 
     public WaveFormat WaveFormat { get; }
+
+    /// <summary>
+    /// DoP idle: valid DoP frames carrying DSD silence, with the marker sequence continuing. After the last
+    /// sample the DAC stays in DSD mode instead of seeing markerless zeros (which would click).
+    /// </summary>
+    public void WriteSilence(Span<byte> buffer)
+    {
+        int frames = buffer.Length / (3 * _channels);
+        int o = 0;
+        for (int f = 0; f < frames; f++)
+        {
+            byte marker = _nextIsMarkerA ? MarkerA : MarkerB;
+            _nextIsMarkerA = !_nextIsMarkerA;
+            for (int c = 0; c < _channels; c++)
+            {
+                buffer[o++] = DsdWaveStream.SilenceByte;
+                buffer[o++] = DsdWaveStream.SilenceByte;
+                buffer[o++] = marker;
+            }
+        }
+
+        buffer[o..].Clear();
+    }
 
     public int Read(byte[] buffer, int offset, int count) => Read(buffer.AsSpan(offset, count));
 
