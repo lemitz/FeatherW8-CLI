@@ -40,6 +40,7 @@ internal sealed class PlaybackSession : IDisposable
 
             selection = AudioOutputFactory.Create(synchronizedSource, AppSettings.AudioOutput, forceShared);
             selection.Player.PlaybackStopped += OnPlaybackStopped;
+            selection.Finished += OnFinished;
             prefetch.WaitUntilBuffered(0.5, 3000); // do not start on an empty buffer
             selection.Player.Play();
         }
@@ -137,6 +138,13 @@ internal sealed class PlaybackSession : IDisposable
                 _source.Dispose();
             }
         }
+    }
+
+    private void OnFinished(object? sender, EventArgs e)
+    {
+        // The provider delivered the last sample and a silent tail: the track is over.
+        if (Volatile.Read(ref _disposing) == 0)
+            Interlocked.Exchange(ref _ended, 1);
     }
 
     private void OnPlaybackStopped(object? sender, StoppedEventArgs e)

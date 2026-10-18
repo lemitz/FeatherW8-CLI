@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/lemitz/FeatherW8-CLI/releases"><img src="https://img.shields.io/badge/version-1.2.0-8b8cff" alt="Версия 1.2.0"></a>
+  <a href="https://github.com/lemitz/FeatherW8-CLI/releases"><img src="https://img.shields.io/badge/version-1.2.1-8b8cff" alt="Версия 1.2.1"></a>
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011%20x64-0078d4" alt="Windows 10 / 11 x64">
   <img src="https://img.shields.io/badge/built%20with-.NET%2010-512bd4" alt=".NET 10">
   <img src="https://img.shields.io/badge/output-ASIO%20%7C%20WASAPI%20Exclusive-e8590c" alt="ASIO / WASAPI Exclusive">
@@ -32,7 +32,7 @@ FeatherW8 делает одну вещь: берёт файлы или папк�
 Весь интерфейс целиком:
 
 ```
-FeatherW8 1.2.0  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD
+FeatherW8 1.2.1  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD
 Трек 3/12: 03 - Blue in Green.flac
 [=========================>-------------------------------------] 02:14 / 05:37
 Статус: играет   Повтор: выкл.
@@ -70,7 +70,7 @@ FeatherW8 1.2.0  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD
 
 **Всё остальное**
 - Один исполняемый файл и один текстовый файл настроек рядом с ним; portable-версия и установленная ведут себя одинаково
-- Необязательное контекстное меню Проводника — «Проиграть в FeatherW8» для `.mp3` / `.wav` / `.flac` / `.ogg` / `.opus` / `.dsf` / `.dff` и «Открыть папку в FeatherW8» для папок — только для текущего пользователя, без прав администратора и без смены приложений по умолчанию
+- Необязательное контекстное меню Проводника (с иконкой FeatherW8) — «Проиграть в FeatherW8» для `.mp3` / `.wav` / `.flac` / `.ogg` / `.opus` / `.dsf` / `.dff` и «Открыть папку в FeatherW8» для папок — только для текущего пользователя, без прав администратора и без смены приложений по умолчанию
 - `--help`, осмысленные коды выхода (`0` — ок, `1` — ошибка воспроизведения, `2` — неверный вызов или нечего играть), переменные окружения в путях раскрываются
 - Без телеметрии, без доступа в сеть, без фоновых служб; сам плеер ничего не пишет ни на диск, ни в реестр (единственные записи в реестре — необязательные ключи контекстного меню в `HKCU`)
 
@@ -251,6 +251,7 @@ src/FeatherW8/
     DsdWaveStream.cs           ридер DSF / DSDIFF: «сырой» 1-бит поток, каналы вперемешку, MSB первым
     DopWaveProvider.cs         упаковывает DSD в 24-бит DoP-PCM для PCM-путей вывода
     OggOpusWaveStream.cs       перематываемый поток Opus-in-Ogg → PCM поверх Concentus
+    TailPaddedProvider.cs      полные буферы для устройства + тихий хвост; сам определяет конец трека (автопереход по очереди)
     PrefetchWaveStream.cs      декодирует на опережение в отдельном потоке в кольцевой буфер на ~4 с (убирает дисковый ввод-вывод из аудио-колбэка)
     SynchronizedWaveStream.cs  сериализует чтение декодера и перемотку из UI-потока
   UI/

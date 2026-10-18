@@ -1,17 +1,11 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 
 $verb = 'FeatherW8.Play'
-$paths = @(
-    'HKCU:\Software\Classes\SystemFileAssociations\.mp3\shell\' + $verb,
-    'HKCU:\Software\Classes\SystemFileAssociations\.wav\shell\' + $verb,
-    'HKCU:\Software\Classes\SystemFileAssociations\.ogg\shell\' + $verb,
-    'HKCU:\Software\Classes\SystemFileAssociations\.opus\shell\' + $verb,
-    'HKCU:\Software\Classes\SystemFileAssociations\.flac\shell\' + $verb,
-    'HKCU:\Software\Classes\SystemFileAssociations\.dsf\shell\' + $verb,
-    'HKCU:\Software\Classes\SystemFileAssociations\.dff\shell\' + $verb,
-    'HKCU:\Software\Classes\Directory\shell\' + $verb
-)
-
+$extensions = @('.mp3', '.wav', '.flac', '.ogg', '.opus', '.dsf', '.dff')
+# Each path is built inside its own parentheses: in PowerShell a comma binds tighter than +, so
+# @('a' + $x, 'b' + $x) would not be a list of two paths.
+$paths = @($extensions | ForEach-Object { "HKCU:\Software\Classes\SystemFileAssociations\$_\shell\$verb" })
+$paths += "HKCU:\Software\Classes\Directory\shell\$verb"
 foreach ($path in $paths) {
     Remove-Item -LiteralPath $path -Recurse -Force -ErrorAction SilentlyContinue
 }
@@ -33,5 +27,5 @@ $language = if ($languageSetting -in @('ru', 'en')) {
 if ($language -eq 'ru') {
     Write-Host 'Пункт FeatherW8 удалён из контекстного меню текущего пользователя.'
 } else {
-    Write-Host 'FeatherW8 was removed from the current user’s context menu.'
+    Write-Host "FeatherW8 was removed from the current user's context menu."
 }
