@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/lemitz/FeatherW8-CLI/releases"><img src="https://img.shields.io/badge/version-1.1.1-8b8cff" alt="Version 1.1.1"></a>
+  <a href="https://github.com/lemitz/FeatherW8-CLI/releases"><img src="https://img.shields.io/badge/version-1.2.0-8b8cff" alt="Version 1.2.0"></a>
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011%20x64-0078d4" alt="Windows 10 / 11 x64">
   <img src="https://img.shields.io/badge/built%20with-.NET%2010-512bd4" alt=".NET 10">
   <img src="https://img.shields.io/badge/output-ASIO%20%7C%20WASAPI%20Exclusive-e8590c" alt="ASIO / WASAPI Exclusive">
@@ -32,7 +32,7 @@ FeatherW8 does one thing: it takes the files or folders you hand it and plays th
 This is the whole interface:
 
 ```
-FeatherW8 1.1.1  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD
+FeatherW8 1.2.0  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD
 Track 3/12: 03 - Blue in Green.flac
 [=========================>-------------------------------------] 02:14 / 05:37
 Status: playing   Repeat: off
@@ -45,6 +45,7 @@ Output: ASIO — FiiO ASIO Driver
 **Playback**
 - MP3, WAV, **FLAC** (4–24 bit, up to 768 kHz), Ogg Vorbis, Opus-in-Ogg and **DSD** (`.dsf`, `.dff`; DSD64 / DSD128 / DSD256), mono and stereo. `.ogg` files are sniffed, so Opus inside `.ogg` plays just as well as `.opus`
 - Takes any mix of files and folders — from the command line, from the Explorer context menu or dropped onto the launcher
+- One player at a time: opening another file (double-click, context menu, a second command) while FeatherW8 is playing stops the current playback and starts the new one - two players never share the DAC. If the old player does not react within 8 s it is ended
 - Folders are scanned one level deep and sorted by file name; files you pass explicitly keep their order
 - Seek by 5 s or 30 s, pause / resume, repeat off → track → queue
 - Decoding runs ahead on its own thread into a ~4 s buffer, so a slow or busy disk (a spinning HDD, a virus scan, a download) cannot make the music stutter - the audio callback only copies finished samples
@@ -240,6 +241,7 @@ src/FeatherW8/
     PlaybackSession.cs         one track = one session: decoder + output device, seek, pause
     AudioOutputFactory.cs      ASIO / WASAPI Exclusive / Shared selection and endpoint matching, DSD path order
     NativeDsdAsioPlayer.cs     native DSD over ASIO (kAsioSetIoFormat, DSDInt8MSB1) on top of NAudio's AsioDriver
+    SingleInstance.cs          one player at a time: a new one asks the running one to quit and takes over
     TrackQueueBuilder.cs       files and folders from the command line → sorted queue
     AppSettings.cs             FeatherW8.properties parser
     Texts.cs                   embedded English / Russian message catalog

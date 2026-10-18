@@ -46,6 +46,9 @@ internal static class Program
             return 2;
         }
 
+        // Opening a file while a player is already running replaces its playback. Declared before the
+        // player on purpose: it is released last, after the audio device has been closed.
+        using var instance = SingleInstance.TakeOver(TimeSpan.FromSeconds(8));
         using var player = new PlayerController(tracks);
         bool oldCursorVisible = true;
 
@@ -57,7 +60,7 @@ internal static class Program
             Console.Clear();
 
             player.Start();
-            while (!player.ExitRequested)
+            while (!player.ExitRequested && !instance.QuitRequested)
             {
                 while (Console.KeyAvailable)
                 {
