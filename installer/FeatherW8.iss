@@ -1,7 +1,7 @@
 #define AppName "FeatherW8"
 ; CI passes the release version with: iscc /DAppVersion=1.2.3 installer\FeatherW8.iss
 #ifndef AppVersion
-  #define AppVersion "1.1.1"
+  #define AppVersion "1.2.0"
 #endif
 #define AppExeName "FeatherW8.exe"
 #define ContextVerb "FeatherW8.Play"
