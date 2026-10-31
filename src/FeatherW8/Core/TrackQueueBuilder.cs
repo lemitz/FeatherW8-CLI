@@ -6,10 +6,14 @@ internal static class TrackQueueBuilder
     {
         ".mp3", ".wav", ".ogg", ".opus", ".flac", ".fla", ".dsf", ".dff"
     };
-
-    public static List<string> Build(IEnumerable<string> arguments, TextWriter diagnostics)
+    private static readonly HashSet<string> CueAudioExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
-        var tracks = new List<string>();
+        ".wav", ".flac", ".fla"
+    };
+
+    public static List<QueueTrack> Build(IEnumerable<string> arguments, TextWriter diagnostics)
+    {
+        var tracks = new List<QueueTrack>();
 
         foreach (string argument in arguments)
         {
@@ -19,13 +23,31 @@ internal static class TrackQueueBuilder
             {
                 try
                 {
-                    var fromFolder = Directory.EnumerateFiles(path, "*", SearchOption.TopDirectoryOnly)
-                        .Where(IsSupported)
-                        .OrderBy(file => Path.GetFileName(file), StringComparer.OrdinalIgnoreCase);
+                    string[] files = Directory.EnumerateFiles(path, "*", SearchOption.TopDirectoryOnly)
+                        .OrderBy(file => Path.GetFileName(file), StringComparer.OrdinalIgnoreCase)
+                        .ToArray();
+                    var cues = new Dictionary<string, List<QueueTrack>>(StringComparer.OrdinalIgnoreCase);
+                    var referenced = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-                    tracks.AddRange(fromFolder);
+                    // Parse all sheets first so a raw file preceding its sheet by name is not queued twice.
+                    foreach (string file in files.Where(IsCue))
+                    {
+                        List<QueueTrack> cueTracks = CueSheetParser.Parse(file, diagnostics);
+                        cues[file] = cueTracks;
+                        foreach (QueueTrack track in cueTracks)
+                            referenced.Add(track.Path);
+                    }
+
+                    foreach (string file in files)
+                    {
+                        if (IsCue(file))
+                            tracks.AddRange(cues[file]);
+                        else if (IsSupported(file) && !referenced.Contains(Path.GetFullPath(file)))
+                            tracks.Add(new QueueTrack(Path.GetFullPath(file)));
+                    }
                 }
-                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException
+                    or NotSupportedException or System.Security.SecurityException)
                 {
                     diagnostics.WriteLine(Texts.Format("FolderReadError", path, ex.Message));
                 }
@@ -39,17 +61,36 @@ internal static class TrackQueueBuilder
                 continue;
             }
 
+            if (IsCue(path))
+            {
+                tracks.AddRange(CueSheetParser.Parse(path, diagnostics));
+                continue;
+            }
+
             if (!IsSupported(path))
             {
                 diagnostics.WriteLine(Texts.Format("UnsupportedFile", path));
                 continue;
             }
 
-            tracks.Add(Path.GetFullPath(path));
+            try
+            {
+                tracks.Add(new QueueTrack(Path.GetFullPath(path)));
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException
+                or NotSupportedException or System.Security.SecurityException)
+            {
+                diagnostics.WriteLine(Texts.Format("NotFound", path));
+            }
         }
 
         return tracks;
     }
 
-    private static bool IsSupported(string path) => SupportedExtensions.Contains(Path.GetExtension(path));
+    internal static bool IsSupported(string path) => SupportedExtensions.Contains(Path.GetExtension(path));
+
+    // A CUE index is a position in PCM samples; never wrap DSD or lossy/variable-rate sources.
+    internal static bool IsCueAudioSupported(string path) => CueAudioExtensions.Contains(Path.GetExtension(path));
+
+    private static bool IsCue(string path) => Path.GetExtension(path).Equals(".cue", StringComparison.OrdinalIgnoreCase);
 }

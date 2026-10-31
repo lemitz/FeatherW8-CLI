@@ -1,7 +1,7 @@
 ﻿$ErrorActionPreference = 'Stop'
 
 $verb = 'FeatherW8.Play'
-$extensions = @('.mp3', '.wav', '.flac', '.ogg', '.opus', '.dsf', '.dff')
+$extensions = @('.mp3', '.wav', '.flac', '.ogg', '.opus', '.dsf', '.dff', '.cue')
 # Each path is built inside its own parentheses: in PowerShell a comma binds tighter than +, so
 # @('a' + $x, 'b' + $x) would not be a list of two paths.
 $paths = @($extensions | ForEach-Object { "HKCU:\Software\Classes\SystemFileAssociations\$_\shell\$verb" })

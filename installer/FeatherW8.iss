@@ -1,7 +1,7 @@
 ﻿#define AppName "FeatherW8"
 ; CI passes the release version with: iscc /DAppVersion=1.2.3 installer\FeatherW8.iss
 #ifndef AppVersion
-  #define AppVersion "1.2.1"
+  #define AppVersion "1.3.0"
 #endif
 #define AppExeName "FeatherW8.exe"
 #define ContextVerb "FeatherW8.Play"
@@ -64,6 +64,9 @@ Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.opus\shell\{#Conte
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.flac\shell\{#ContextVerb}"; ValueType: string; ValueData: "{cm:PlayVerb}"; Flags: uninsdeletekey; Tasks: filecontext
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.flac\shell\{#ContextVerb}"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\{#AppExeName}"",0"; Flags: uninsdeletekey; Tasks: filecontext
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.flac\shell\{#ContextVerb}\command"; ValueType: string; ValueData: """{app}\{#AppExeName}"" ""%1"""; Flags: uninsdeletekey; Tasks: filecontext
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.cue\shell\{#ContextVerb}"; ValueType: string; ValueData: "{cm:PlayVerb}"; Flags: uninsdeletekey; Tasks: filecontext
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.cue\shell\{#ContextVerb}"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\{#AppExeName}"",0"; Flags: uninsdeletekey; Tasks: filecontext
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.cue\shell\{#ContextVerb}\command"; ValueType: string; ValueData: """{app}\{#AppExeName}"" ""%1"""; Flags: uninsdeletekey; Tasks: filecontext
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.dsf\shell\{#ContextVerb}"; ValueType: string; ValueData: "{cm:PlayVerb}"; Flags: uninsdeletekey; Tasks: filecontext
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.dsf\shell\{#ContextVerb}"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\{#AppExeName}"",0"; Flags: uninsdeletekey; Tasks: filecontext
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.dsf\shell\{#ContextVerb}\command"; ValueType: string; ValueData: """{app}\{#AppExeName}"" ""%1"""; Flags: uninsdeletekey; Tasks: filecontext

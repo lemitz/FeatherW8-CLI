@@ -20,9 +20,22 @@ internal sealed class PlaybackSession : IDisposable
     private volatile Exception? _failure;
     private volatile bool _userPaused;
 
-    public PlaybackSession(string path, bool forceShared = false, long initialPosition = 0)
+    public PlaybackSession(QueueTrack track, bool forceShared = false, long initialPosition = 0)
     {
-        WaveStream rawSource = AudioSourceFactory.Open(path);
+        WaveStream rawSource = AudioSourceFactory.Open(track.Path);
+        if (track.Range is CueRange range)
+        {
+            try
+            {
+                rawSource = new CueRangeWaveStream(rawSource, range);
+            }
+            catch
+            {
+                rawSource.Dispose();
+                throw;
+            }
+        }
+
         // Decode ahead on a worker thread so the real-time audio callback never waits for the disk.
         var prefetch = new PrefetchWaveStream(rawSource);
         var synchronizedSource = new SynchronizedWaveStream(prefetch);

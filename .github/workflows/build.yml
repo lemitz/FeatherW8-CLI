@@ -49,6 +49,9 @@ jobs:
       - name: Build (restore, compile)
         run: dotnet build src/FeatherW8/FeatherW8.csproj --configuration Release -p:Version=${{ steps.version.outputs.version }}
 
+      - name: Test CUE queue and playback ranges
+        run: dotnet run --project tests/FeatherW8.Tests/FeatherW8.Tests.csproj --configuration Release
+
       - name: Publish portable archives
         shell: pwsh
         run: ./scripts/publish.ps1 -Version ${{ steps.version.outputs.version }}

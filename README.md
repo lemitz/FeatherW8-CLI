@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/lemitz/FeatherW8-CLI/releases"><img src="https://img.shields.io/badge/version-1.2.1-8b8cff" alt="Version 1.2.1"></a>
+  <a href="https://github.com/lemitz/FeatherW8-CLI/releases"><img src="https://img.shields.io/badge/version-1.3.0-8b8cff" alt="Version 1.3.0"></a>
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011%20x64-0078d4" alt="Windows 10 / 11 x64">
   <img src="https://img.shields.io/badge/built%20with-.NET%2010-512bd4" alt=".NET 10">
   <img src="https://img.shields.io/badge/output-ASIO%20%7C%20WASAPI%20Exclusive-e8590c" alt="ASIO / WASAPI Exclusive">
@@ -32,7 +32,7 @@ FeatherW8 does one thing: it takes the files or folders you hand it and plays th
 This is the whole interface:
 
 ```
-FeatherW8 1.2.1  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD
+FeatherW8 1.3.0  |  MP3 · WAV · FLAC · Ogg Vorbis · Opus · DSD
 Track 3/12: 03 - Blue in Green.flac
 [=========================>-------------------------------------] 02:14 / 05:37
 Status: playing   Repeat: off
@@ -47,6 +47,7 @@ Output: ASIO — FiiO ASIO Driver
 - Takes any mix of files and folders — from the command line, from the Explorer context menu or dropped onto the launcher
 - One player at a time: opening another file (double-click, context menu, a second command) while FeatherW8 is playing stops the current playback and starts the new one - two players never share the DAC. If the old player does not react within 8 s it is ended
 - Folders are scanned one level deep and sorted by file name; files you pass explicitly keep their order
+- `.cue` sheets split a single FLAC/WAV image (or multiple referenced files) into queue tracks without changing the audio. Opening a folder with a CUE uses its track titles and avoids playing the referenced file again as one long track. `↑`/`↓`, seeking, progress and repeat work within each track
 - Seek by 5 s or 30 s, pause / resume, repeat off → track → queue
 - Decoding runs ahead on its own thread into a ~4 s buffer, so a slow or busy disk (a spinning HDD, a virus scan, a download) cannot make the music stutter - the audio callback only copies finished samples
 - Progress bar stretched across the whole window with elapsed / total time, redrawn every 80 ms
@@ -70,7 +71,7 @@ Output: ASIO — FiiO ASIO Driver
 
 **Everything else**
 - One executable and one plain-text settings file next to it; the portable build and the installed one behave identically
-- Optional Explorer context menu (with the FeatherW8 icon) — *Play in FeatherW8* for `.mp3` / `.wav` / `.flac` / `.ogg` / `.opus` / `.dsf` / `.dff` and *Open folder in FeatherW8* for folders — registered for the current user only, without admin rights and without touching default apps
+- Optional Explorer context menu (with the FeatherW8 icon) — *Play in FeatherW8* for `.mp3` / `.wav` / `.flac` / `.cue` / `.ogg` / `.opus` / `.dsf` / `.dff` and *Open folder in FeatherW8* for folders — registered for the current user only, without admin rights and without touching default apps
 - `--help`, meaningful exit codes (`0` ok, `1` playback error, `2` wrong usage or nothing to play), environment variables in paths are expanded
 - No telemetry, no network access, no background service; the player itself never writes to disk or the registry (the only registry entries are the optional context-menu keys under `HKCU`)
 
@@ -113,6 +114,7 @@ Open a file or folder from Explorer (context menu, or drop it onto `FeatherW8-La
 
 ```
 FeatherW8.exe "D:\Music\Some Album"
+FeatherW8.exe "D:\Music\Some Album\Album.cue"
 FeatherW8.exe intro.wav "D:\Music\Some Album" bonus.opus
 FeatherW8.exe --help
 ```
@@ -121,7 +123,7 @@ FeatherW8 needs an interactive console window (Windows Terminal and the classic 
 
 ### Explorer context menu (portable build)
 
-- `Register-Integration.bat` adds *Play in FeatherW8* to MP3/WAV/FLAC/Ogg/Opus/DSD files and *Open folder in FeatherW8* to folders for the current user. On Windows 11 the entries live under *Show more options*.
+- `Register-Integration.bat` adds *Play in FeatherW8* to MP3/WAV/FLAC/CUE/Ogg/Opus/DSD files and *Open folder in FeatherW8* to folders for the current user. On Windows 11 the entries live under *Show more options*.
 - `Unregister-Integration.bat` removes them.
 - Windows stores the absolute path to the EXE, so run `Register-Integration.bat` again after moving the folder.
 - The installer does the same through its optional task and removes the entries on uninstall.
@@ -194,6 +196,7 @@ Requirements:
 
 ```bash
 dotnet build src/FeatherW8/FeatherW8.csproj
+dotnet run --project tests/FeatherW8.Tests
 dotnet run --project src/FeatherW8 -- "D:\Music\Some Album"
 ```
 
@@ -224,7 +227,7 @@ Before distributing a build with ASIO support, review the ASIO SDK redistributio
 
 - Windows 10/11 x64 only.
 - FLAC and DSD are limited to mono/stereo; FLAC up to 24 bit (no 32-bit), no change of format inside one FLAC stream. DSD512, DST-compressed DSDIFF and DSD playback through WASAPI Shared are not supported. Native DSD needs an ASIO driver with DSD support; every other path uses DoP.
-- No recursive folder scan, M3U/CUE, shuffle, tag reading (the file name is shown) or volume control — the last one on purpose: software volume would break bit-perfect output. Use the knob on the DAC.
+- No recursive folder scan, M3U, shuffle, audio tag reading (CUE titles are shown) or volume control — the last one on purpose: software volume would break bit-perfect output. Use the knob on the DAC. CUE sheets reference existing supported audio files; they do not extract or repair them.
 - Seeking in Opus re-decodes the stream from the beginning, so a seek in a long file can take a moment. Opus is limited to mono/stereo.
 - The Vorbis decoder (NVorbis) has upstream quirks when seeking to the very end of a file and back to the start.
 - MP3 is decoded by Windows Media Foundation; on Windows "N" editions install the Media Feature Pack first.

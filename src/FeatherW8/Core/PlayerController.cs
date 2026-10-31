@@ -9,14 +9,14 @@ internal enum MessageLevel
 
 internal sealed class PlayerController : IDisposable
 {
-    private readonly IReadOnlyList<string> _tracks;
+    private readonly IReadOnlyList<QueueTrack> _tracks;
     private PlaybackSession? _session;
     private bool _sharedAcceptedForQueue;
     private bool _awaitingFallback;
     private bool _fallbackOffersShared = true;
     private long _fallbackPosition;
 
-    public PlayerController(IReadOnlyList<string> tracks)
+    public PlayerController(IReadOnlyList<QueueTrack> tracks)
     {
         if (tracks.Count == 0)
             throw new ArgumentException(Texts.Get("QueueEmpty"), nameof(tracks));
@@ -25,7 +25,17 @@ internal sealed class PlayerController : IDisposable
     }
 
     public int CurrentIndex { get; private set; }
-    public string CurrentPath => _tracks[CurrentIndex];
+    public string CurrentPath => _tracks[CurrentIndex].Path;
+    public string CurrentDisplayName
+    {
+        get
+        {
+            QueueTrack track = _tracks[CurrentIndex];
+            if (track.Number is int number)
+                return $"{number:00}. {track.Title ?? Path.GetFileName(track.Path)}";
+            return Path.GetFileName(track.Path);
+        }
+    }
     public int TrackCount => _tracks.Count;
     public RepeatMode Repeat { get; private set; }
     public bool ExitRequested { get; private set; }
@@ -231,7 +241,7 @@ internal sealed class PlayerController : IDisposable
         try
         {
             bool useShared = forceShared || _sharedAcceptedForQueue;
-            _session = new PlaybackSession(CurrentPath, useShared, initialPosition);
+            _session = new PlaybackSession(_tracks[CurrentIndex], useShared, initialPosition);
             OutputLabel = _session.OutputLabel;
             OutputKind = _session.OutputKind;
             if (!_session.IsStrictOutput)

@@ -6,7 +6,7 @@ Windows 10/11 x64
 БЫСТРЫЙ СТАРТ
 1. Распакуй всю папку в любое удобное место. Папку можно перемещать.
 2. Открой FeatherW8.exe с файлом/папкой или перетащи их на FeatherW8-Launcher.bat.
-3. Запусти Register-Integration.bat, чтобы добавить контекстное меню файлов MP3/WAV/FLAC/Ogg/Opus/DSD и папок. Админ-права не нужны.
+3. Запусти Register-Integration.bat, чтобы добавить контекстное меню файлов MP3/WAV/FLAC/CUE/Ogg/Opus/DSD и папок. Админ-права не нужны.
 4. Для удаления меню запусти Unregister-Integration.bat.
 
 После переноса папки повторно запусти Register-Integration.bat. В Windows 11 пункт может находиться в «Показать дополнительные параметры».
@@ -28,7 +28,7 @@ ENGLISH
 QUICK START
 1. Extract the whole folder anywhere; it can be moved.
 2. Open FeatherW8.exe with a file/folder, or drag one onto FeatherW8-Launcher.bat.
-3. Run Register-Integration.bat to add MP3/WAV/FLAC/Ogg/Opus/DSD file and folder context-menu entries. No admin rights are needed.
+3. Run Register-Integration.bat to add MP3/WAV/FLAC/CUE/Ogg/Opus/DSD file and folder context-menu entries. No admin rights are needed.
 4. Run Unregister-Integration.bat to remove the entries.
 
 After moving the folder, run Register-Integration.bat again. On Windows 11 the entry may be under “Show more options”.

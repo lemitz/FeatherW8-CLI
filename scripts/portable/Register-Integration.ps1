@@ -31,7 +31,7 @@ $isRussian = $language -eq 'ru'
 $playLabel = if ($isRussian) { 'Проиграть в FeatherW8' } else { 'Play in FeatherW8' }
 $folderLabel = if ($isRussian) { 'Открыть папку в FeatherW8' } else { 'Open folder in FeatherW8' }
 $verb = 'FeatherW8.Play'
-$extensions = @('.mp3', '.wav', '.flac', '.ogg', '.opus', '.dsf', '.dff')
+$extensions = @('.mp3', '.wav', '.flac', '.ogg', '.opus', '.dsf', '.dff', '.cue')
 $command = '"' + $player + '" "%1"'
 $icon = '"' + $player + '",0'   # the menu entry shows the player's icon
 
@@ -52,12 +52,12 @@ New-Item -Path "$folderKey\command" -Force | Out-Null
 Set-Item -Path "$folderKey\command" -Value $command
 
 if ($isRussian) {
-    Write-Host 'Готово: пункты FeatherW8 добавлены в контекстное меню MP3/WAV/FLAC/Ogg/Opus/DSD и папок.'
+    Write-Host 'Готово: пункты FeatherW8 добавлены в контекстное меню MP3/WAV/FLAC/Ogg/Opus/DSD/CUE и папок.'
     Write-Host "Плеер: $player"
     Write-Host 'Запись сделана только для текущего пользователя (HKCU), админ-права не нужны.'
     Write-Host 'Если переместишь portable-папку, запусти Register-Integration.bat ещё раз.'
 } else {
-    Write-Host 'Done: FeatherW8 context-menu entries were added for MP3/WAV/FLAC/Ogg/Opus/DSD and folders.'
+    Write-Host 'Done: FeatherW8 context-menu entries were added for MP3/WAV/FLAC/Ogg/Opus/DSD/CUE and folders.'
     Write-Host "Player: $player"
     Write-Host 'The entries were added for the current user only (HKCU); no administrator rights are needed.'
     Write-Host 'If you move the portable folder, run Register-Integration.bat again.'

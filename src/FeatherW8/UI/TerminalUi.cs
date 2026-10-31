@@ -20,7 +20,7 @@ internal static class TerminalUi
         var lines = new List<(string Text, ConsoleColor? Color)>
         {
             (Texts.Get("UiHeader"), null),
-            (Texts.Format("TrackLine", player.CurrentIndex + 1, player.TrackCount, Path.GetFileName(player.CurrentPath)), null),
+            (Texts.Format("TrackLine", player.CurrentIndex + 1, player.TrackCount, player.CurrentDisplayName), null),
             (BuildProgress(player, width), null),
             (Texts.Format("StatusLine", StatusLabel(player), PlayerController.RepeatLabel(player.Repeat)), null),
             (string.IsNullOrWhiteSpace(player.OutputLabel) ? string.Empty : Texts.Format("AudioModeSelected", player.OutputLabel), OutputColor(player.OutputKind)),
