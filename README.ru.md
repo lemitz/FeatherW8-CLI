@@ -271,7 +271,7 @@ THIRD-PARTY-NOTICES.md         лицензии используемых пак�
 
 ## Технологии
 
-[.NET 10](https://dotnet.microsoft.com) · C# · [NAudio](https://github.com/naudio/NAudio) (`Wasapi`, `Asio`) · [NAudio.Vorbis](https://github.com/naudio/NAudio.Vorbis) / [NVorbis](https://github.com/NVorbis/NVorbis) · [Concentus.Oggfile](https://github.com/lostromb/concentus.oggfile) / [Concentus](https://github.com/lostromb/Concentus) · Windows Media Foundation · [Inno Setup 6](https://jrsoftware.org/isinfo.php)
+[.NET 10](https://dotnet.microsoft.com) · C# · [NAudio](https://github.com/naudio/NAudio) (`Wasapi`, `Asio`) · [NAudio.Vorbis](https://github.com/naudio/Vorbis) / [NVorbis](https://github.com/NVorbis/NVorbis) · [Concentus.Oggfile](https://github.com/lostromb/concentus.oggfile) / [Concentus](https://github.com/lostromb/Concentus) · Windows Media Foundation · [Inno Setup 6](https://jrsoftware.org/isinfo.php)
 
 Ищешь версию для Android? Это [lemitz/FeatherW8](https://github.com/lemitz/FeatherW8).
 

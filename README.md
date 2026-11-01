@@ -271,7 +271,7 @@ The split is deliberate: `UI` only reads state from `PlayerController` and draws
 
 ## Tech stack
 
-[.NET 10](https://dotnet.microsoft.com) · C# · [NAudio](https://github.com/naudio/NAudio) (`Wasapi`, `Asio`) · [NAudio.Vorbis](https://github.com/naudio/NAudio.Vorbis) / [NVorbis](https://github.com/NVorbis/NVorbis) · [Concentus.Oggfile](https://github.com/lostromb/concentus.oggfile) / [Concentus](https://github.com/lostromb/Concentus) · Windows Media Foundation · [Inno Setup 6](https://jrsoftware.org/isinfo.php)
+[.NET 10](https://dotnet.microsoft.com) · C# · [NAudio](https://github.com/naudio/NAudio) (`Wasapi`, `Asio`) · [NAudio.Vorbis](https://github.com/naudio/Vorbis) / [NVorbis](https://github.com/NVorbis/NVorbis) · [Concentus.Oggfile](https://github.com/lostromb/concentus.oggfile) / [Concentus](https://github.com/lostromb/Concentus) · Windows Media Foundation · [Inno Setup 6](https://jrsoftware.org/isinfo.php)
 
 Looking for the Android version? That's [lemitz/FeatherW8](https://github.com/lemitz/FeatherW8).
 
