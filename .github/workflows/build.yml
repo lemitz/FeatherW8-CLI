@@ -82,7 +82,7 @@ jobs:
             '{0,12:N0} bytes  {1}' -f (Get-Item $file).Length, $name
           }
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: FeatherW8-${{ steps.version.outputs.version }}-${{ github.run_number }}
           path: dist/*
