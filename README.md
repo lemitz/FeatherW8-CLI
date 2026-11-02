@@ -75,6 +75,8 @@ Output: ASIO — FiiO ASIO Driver
 - `--help`, meaningful exit codes (`0` ok, `1` playback error, `2` wrong usage or nothing to play), environment variables in paths are expanded
 - No telemetry, no network access, no background service; the player itself never writes to disk or the registry (the only registry entries are the optional context-menu keys under `HKCU`)
 
+> **No network, no writes.** FeatherW8 has no network code and never changes your files, but it trusts what you open: a CUE sheet can point to any path, even a network share. See [SECURITY.md](SECURITY.md).
+
 ## Keyboard
 
 | Action | Keys |
